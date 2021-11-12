@@ -8,15 +8,17 @@ export class GlobalStiffnessMatrix {
 
 	_initGlobalStiffnessMatrixWithZeros() {
 		const valuesPerNode = 2;
-		const len = valuesPerNode * this.femNodes.length;
+		const len = valuesPerNode * this.femNodes.size;
+		
 		this.matrix = zeros(len, len).toArray();
+		console.log(this.matrix)
 	}
 
   createGlobalStiffnessMatrix() {
 		this._initGlobalStiffnessMatrixWithZeros();
 
 		this.femElements.forEach(element => {
-			const globalIndex = this.nodeNumberGlobalIndexMap.get(element.startNode.number).concat(this.nodeNumberGlobalIndexMap.get(element.endNode.number))
+			const globalIndex = this.nodeNumberGlobalIndexMap.get(element.node1).concat(this.nodeNumberGlobalIndexMap.get(element.node2))
 			element.globalStiffnessMatrix.forEach((row, rowIndex) => {
 				row.forEach((value, columnIndex) => {
 					this.matrix[globalIndex[rowIndex]][globalIndex[columnIndex]] += value
@@ -29,20 +31,21 @@ export class GlobalStiffnessMatrix {
 		this.nodeNumberGlobalIndexMap = new Map();
 		let index = 0;
 		this.femNodes.forEach(node => {
-			this.nodeNumberGlobalIndexMap.set(node.number, [index, index + 1])
+			this.nodeNumberGlobalIndexMap.set(node, [index, index + 1])
 			index += 2;
 		})
 	}
 
   getElementsGlobalIndexes(element) {
-		const temp = this._getGlobalIndexArray(element.startNode.number);
-		const elementsGlobalIndexes = temp.concat(this._getGlobalIndexArray(element.endNode.number));
-		
+		const temp = this._getGlobalIndexArray(element.node1);
+		const elementsGlobalIndexes = temp.concat(this._getGlobalIndexArray(element.node2));
+
 		return elementsGlobalIndexes;
 	}
 
-	_getGlobalIndexArray(nodeNumber) {
-		return this.nodeNumberGlobalIndexMap.get(nodeNumber);
+	_getGlobalIndexArray(node) {
+
+		return this.nodeNumberGlobalIndexMap.get(node);
 	}
 
   get() {

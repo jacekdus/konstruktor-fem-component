@@ -1,6 +1,6 @@
 import Two from "two.js";
-
 import { ConfigInterface } from "./Config/ConfigInterface";
+
 import { Point, PointBuilder } from "./Point";
 
 export class Renderer {
@@ -143,8 +143,8 @@ export class Renderer {
       + Math.floor(Math.random() * 255) + ')';
   }
 
-  makeNodeLabel(p: Point, id: string) {
-    const label = this.makeLabel(p, id);
+  makeNodeLabel(p: Point, id: number) {
+    const label = this.makeLabel(p, id.toString());
     this.two.add(label);
   }
 

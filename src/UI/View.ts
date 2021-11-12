@@ -1,6 +1,6 @@
 import { Renderer } from "./Renderer";
 import { ConfigInterface } from "./Config/ConfigInterface";
-import { Node, Element, Displacement, Boundary, Load } from "./Model";
+import { Node, Element, Displacement, Boundary, Load } from "../Model";
 import { Point, PointBuilder } from "./Point";
 
 export default class View {
@@ -16,23 +16,28 @@ export default class View {
     return this.renderer;
   }
 
-  makeDisplacements(eArr: Element[], dArr: Displacement[], scaleFactor: number) {
-    eArr.forEach(e => {
+  makeDisplacements(elements: Map<number, Element>, displacements: Map<Node, Displacement>, scaleFactor: number) {
+    elements.forEach(e => {
       const p1: Point = this.pointBuilder.getPointFromNode(e.node1);
       const p2: Point = this.pointBuilder.getPointFromNode(e.node2);
 
-      const d1 = dArr.find(d => e.node1 === d.node);
-      const d2 = dArr.find(d => e.node2 === d.node);
+      const d1 = displacements.get(e.node1);
+      const d2 = displacements.get(e.node2);
 
       const dp1 = this.getDisplacedPoint(p1, d1, scaleFactor);
       const dp2 = this.getDisplacedPoint(p2, d2, scaleFactor);
 
       this.renderer.makeDisplacedElement(dp1, dp2);
-
-      // refactor - labels are overlaping
-      this.renderer.makeDisplacementLabel(dp1, `(${(d1.dx * 100).toFixed(1)}, ${(d1.dy * 100).toFixed(1)}) [cm]`);
-      this.renderer.makeDisplacementLabel(dp2, `(${(d2.dx * 100).toFixed(1)}, ${(d2.dy * 100).toFixed(1)}) [cm]`);
     });
+  }
+
+  makeDisplacementLabels(displacements: Map<Node, Displacement>, scaleFactor: number) {
+    displacements.forEach((d: Displacement, node: Node) => {
+      const p: Point = this.pointBuilder.getPointFromNode(node)
+      const dp = this.getDisplacedPoint(p, d, scaleFactor)
+
+      this.renderer.makeDisplacementLabel(dp, `dx=${d.dx}, dy=${d.dy}`)
+    })
   }
 
   private getDisplacedPoint(p: Point, d: Displacement, scaleFactor: number) {
@@ -41,8 +46,8 @@ export default class View {
     return p
   }
 
-  makeElements(eArr: Element[]) {
-    eArr.forEach(e => {
+  makeElements(elements: Map<number, Element>) {
+    elements.forEach(e => {
       const p1: Point = this.pointBuilder.getPointFromNode(e.node1);
       const p2: Point = this.pointBuilder.getPointFromNode(e.node2);
 
@@ -50,42 +55,42 @@ export default class View {
     });
   }
 
-  makeElementsLabels(eArr: Element[]) {
-    eArr.forEach(e => {
+  makeElementsLabels(elements: Map<number, Element>) {
+    elements.forEach((e, nodeNumber) => {
       const p1: Point = this.pointBuilder.getPointFromNode(e.node1);
       const p2: Point = this.pointBuilder.getPointFromNode(e.node2);
 
-      this.renderer.makeElementLabel(p1, p2, e.opts.id);
+      this.renderer.makeElementLabel(p1, p2, nodeNumber);
     });
   }
 
-  makeNodes(nArr: Node[]) {
-    nArr.forEach(n => {
+  makeNodes(nodes: Map<number, Node>) {
+    nodes.forEach(n => {
       const p: Point = this.pointBuilder.getPointFromNode(n);
 
       this.renderer.makeNode(p);
     });
   }
 
-  makeNodesLabels(nArr: Node[]) {
-    nArr.forEach(n => {
+  makeNodesLabels(nodes: Map<number, Node>) {
+    nodes.forEach((n, nodeNumber) => {
       const p: Point = this.pointBuilder.getPointFromNode(n);
 
-      this.renderer.makeNodeLabel(p, n.opts.id);
+      this.renderer.makeNodeLabel(p, nodeNumber);
     });
   }
 
-  makeSupports(bArr: Boundary[]) {
-    bArr.forEach(b => {
-      const p: Point = this.pointBuilder.getPointFromNode(b.node);
+  makeSupports(boundaries: Map<Node, Boundary>) {
+    boundaries.forEach((b, node) => {
+      const p: Point = this.pointBuilder.getPointFromNode(node);
 
       this.renderer.makeSupport(p, b.xFixed, b.yFixed);
     });
   }
 
-  makeLoads(lArr: Load[]) {
-    lArr.forEach(l => {
-      const p: Point = this.pointBuilder.getPointFromNode(l.node);
+  makeLoads(loads: Map<Node, Load>) {
+    loads.forEach((l, node) => {
+      const p: Point = this.pointBuilder.getPointFromNode(node);
 
       this.renderer.makeLoad(p, l.fx, l.fy);
     });

@@ -1,8 +1,8 @@
 import { Model, Displacement, Node } from './Model';
-import View from "./View";
+import View from "./UI/View";
 import { model } from './exampleModel';
-import { config } from "./Config/config"
-import { start } from './lib/fem/Test/ModelTest'
+import { config } from "./UI/Config/config"
+import { start as UIstart } from './Fem/Test/ModelTest'
 
 // function mouseEvents(drawNodeCallback: Function, updateSceneCallback: Function) {
 //   elements.container.addEventListener('click', event => {
@@ -40,10 +40,10 @@ class Controller {
     private view: View = view
   ) {}
 
-  private getMaxAbsDisplacementValue(dArr: Displacement[]) {
+  private getMaxAbsDisplacementValue(displacements: Map<Node, Displacement>) {
     let absMax = 0;
 
-    dArr.forEach(d => {
+    displacements.forEach(d => {
       if (d.dx < Math.abs(d.dx)) {
         absMax = d.dx;
       }
@@ -99,7 +99,7 @@ class Controller {
         this.view.getRenderer().remove(config.cursor.two);
         config.cursor.position.x = currentPosition.x;
         config.cursor.position.y = currentPosition.y;
-        console.log(currentPosition.x, currentPosition.y);
+        // console.log(currentPosition.x, currentPosition.y);
         config.cursor.two = this.view.makeCursor(currentPosition.x, currentPosition.y);
         this.updateScene();
       }
@@ -200,8 +200,8 @@ class Controller {
     this.view.makeBorder();
     this.view.makeNodesLabels(this.model.nodes);
     this.view.makeElementsLabels(this.model.elements);
-    // this.view.makeDisplacements(this.model.elements, this.model.results.displacements, this.getDisplacementsScaleFactor());
-
+    this.view.makeDisplacements(this.model.elements, this.model.results.displacements, this.getDisplacementsScaleFactor());
+    this.view.makeDisplacementLabels(this.model.results.displacements, this.getDisplacementsScaleFactor())
   }
 
   // refactor
@@ -214,7 +214,7 @@ const view = new View(config);
 
 const controller = new Controller(model, view);
 controller.init();
-start();
+UIstart();
 
 // // Make an instance of two and place it on the page.
 // var elem = document.getElementById('draw-shapes');
