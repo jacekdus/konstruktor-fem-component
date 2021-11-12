@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      margin: 0px
+    }
+    #container {
+      height: 350;
+      background-color: #f6fbff;
+    }
+    #plus-btn, #minus-btn {
+      color: blue;
+      width: 50px;
+      height: 50px;
+      font-size: 30px;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <button id="plus-btn">+</button>
+  <button id="minus-btn">-</button>
+  <button id="refresh-btn">refresh</button>
+
+  <!-- Current object -->
+  <fieldset id="mode">
+    <input type="radio" id="node-cb" name="activeMode" value="node" checked>
+    <label for="node-cb">Node</label>
+
+    <input type="radio" id="element-cb" name="activeMode" value="element">
+    <label for="element-cb">Element</label>
+
+    <input type="radio" id="support-cb" name="activeMode" value="support">
+    <label for="support-cb">Support</label>
+
+    <input type="radio" id="load-cb" name="activeMode" value="load">
+    <label for="load-cb">Load</label>
+  </fieldset>
+
+  <fieldset id="show">
+    <input type="checkbox" id="nodes" checked>
+    <label for="nodes">Nodes</label>
+
+    <input type="checkbox" id="elements" checked>
+    <label for="elements">Elements</label>
+
+    <input type="checkbox" id="supports" checked>
+    <label for="supports">Supports</label>
+
+    <input type="checkbox" id="all" checked>
+    <label for="supports">All</label>
+  </fieldset>
+
+  <!-- Scripts -->
+  <script src="main.js"></script>
+  <!-- <script>
+    const currentObjForm = document.getElementById('current-obj-form');
+
+    currentObjForm.addEventListener('click', event => { console.log(event.target) });
+
+    const checkboxes = document.getElementById('checkboxForm');
+
+    checkboxes.addEventListener('click', event => {
+        console.log(event.target);
+    })
+  </script> -->
+</body>
+</html>
