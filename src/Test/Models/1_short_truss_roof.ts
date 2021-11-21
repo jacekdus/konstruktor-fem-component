@@ -1,5 +1,4 @@
-import { Material } from './Fem/Materials';
-import { Model, Node, Element, Boundary, Load, Displacement, Section } from './Model';
+import { Model, Node, Element, Boundary, Load, Section, Material } from '../../App/Model';
 
 export const model = new Model();
 
@@ -38,18 +37,22 @@ model.boundaries = new Map([
 ])
 
 model.loads = new Map([
-  [model.nodes.get(4), new Load(0, -100)],
-  [model.nodes.get(7), new Load(-50, -50)]
+  [model.nodes.get(4), new Load(0, -1000000)],
+  // [model.nodes.get(7), new Load(-50000, -50000)]
 ])
 
 model.results = {
-  displacements: new Map([
-    [model.nodes.get(1), new Displacement( 0.0000,  0.0000)],
-    [model.nodes.get(2), new Displacement(-0.0045, -0.0093)],
-    [model.nodes.get(3), new Displacement(-0.0073, -0.0253)],
-    [model.nodes.get(4), new Displacement(-0.0084, -0.0413)],
-    [model.nodes.get(5), new Displacement( 0.0000,  0.0000)],
-    [model.nodes.get(6), new Displacement( 0.0022, -0.0109)],
-    [model.nodes.get(7), new Displacement( 0.0028, -0.0269)]
-  ])
+  displacements: undefined
 }
+
+// model.results = {
+//   displacements: new Map([
+//     [model.nodes.get(1), new Displacement( 0.0000,  0.0000)],
+//     [model.nodes.get(2), new Displacement(-0.0045, -0.0093)],
+//     [model.nodes.get(3), new Displacement(-0.0073, -0.0253)],
+//     [model.nodes.get(4), new Displacement(-0.0084, -0.0413)],
+//     [model.nodes.get(5), new Displacement( 0.0000,  0.0000)],
+//     [model.nodes.get(6), new Displacement( 0.0022, -0.0109)],
+//     [model.nodes.get(7), new Displacement( 0.0028, -0.0269)]
+//   ])
+// }

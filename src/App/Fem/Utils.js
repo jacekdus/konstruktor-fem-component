@@ -1,4 +1,4 @@
-import { Node } from "./../Model";
+import { Node } from "../Model";
 
 const sin = Math.sin;
 const cos = Math.cos;

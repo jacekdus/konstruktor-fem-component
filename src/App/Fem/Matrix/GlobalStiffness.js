@@ -1,6 +1,6 @@
-import { zeros } from 'mathjs';
+import { zeros, matrix, index } from 'mathjs';
 
-export class GlobalStiffnessMatrix {
+export class GlobalStiffness {
   constructor(femNodes, femElements) {
     this.femNodes = femNodes;
     this.femElements = femElements
@@ -11,14 +11,13 @@ export class GlobalStiffnessMatrix {
 		const len = valuesPerNode * this.femNodes.size;
 		
 		this.matrix = zeros(len, len).toArray();
-		console.log(this.matrix)
 	}
 
   createGlobalStiffnessMatrix() {
 		this._initGlobalStiffnessMatrixWithZeros();
 
 		this.femElements.forEach(element => {
-			const globalIndex = this.nodeNumberGlobalIndexMap.get(element.node1).concat(this.nodeNumberGlobalIndexMap.get(element.node2))
+			const globalIndex = this.nodeGlobalIndexMap.get(element.node1).concat(this.nodeGlobalIndexMap.get(element.node2))
 			element.globalStiffnessMatrix.forEach((row, rowIndex) => {
 				row.forEach((value, columnIndex) => {
 					this.matrix[globalIndex[rowIndex]][globalIndex[columnIndex]] += value
@@ -27,11 +26,11 @@ export class GlobalStiffnessMatrix {
 		});
 	}
 
-	createNodeNumberGlobalIndexMap() {
-		this.nodeNumberGlobalIndexMap = new Map();
+	createNodeGlobalIndexMap() {
+		this.nodeGlobalIndexMap = new Map();
 		let index = 0;
 		this.femNodes.forEach(node => {
-			this.nodeNumberGlobalIndexMap.set(node, [index, index + 1])
+			this.nodeGlobalIndexMap.set(node, [index, index + 1])
 			index += 2;
 		})
 	}
@@ -44,11 +43,32 @@ export class GlobalStiffnessMatrix {
 	}
 
 	_getGlobalIndexArray(node) {
-
-		return this.nodeNumberGlobalIndexMap.get(node);
+		return this.nodeGlobalIndexMap.get(node);
 	}
 
-  get() {
+	/**
+	 * 
+	 * @param {Array} boundedMatrixIndexes 
+	 */
+	boundGlobalStiffnessMatrix(boundedMatrixIndexes) {
+		const boundedMatrix = this.matrix
+
+		boundedMatrix.forEach((row, i) => {
+			row.forEach((col, j) => {
+				if (boundedMatrixIndexes.includes(i) || boundedMatrixIndexes.includes(j)) {
+					boundedMatrix[i][j] = 0;
+				}
+			});
+		});
+
+		return boundedMatrix;
+	}
+
+	getSubsettedMatrix(subsettedMatrixIndexes) {
+		return matrix(this.matrix).subset(index(subsettedMatrixIndexes, subsettedMatrixIndexes)).toArray();
+	}
+
+  getMatrix() {
     return this.matrix;
   }
 }

@@ -1,4 +1,4 @@
-import { ConfigInterface } from './Config/ConfigInterface';
+import { ConfigInterface } from '../Config/ConfigInterface';
 import { Node } from '../Model';
 
 export class Point {

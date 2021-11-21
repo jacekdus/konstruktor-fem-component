@@ -1,19 +1,26 @@
-import { Renderer } from "./Renderer";
+import { Renderer } from "./UI/Renderer";
 import { ConfigInterface } from "./Config/ConfigInterface";
-import { Node, Element, Displacement, Boundary, Load } from "../Model";
-import { Point, PointBuilder } from "./Point";
+import { Node, Element, Displacement, Boundary, Load } from "./Model";
+import { Point, PointBuilder } from "./UI/Point";
+
 
 export default class View {
   private renderer: Renderer
   private pointBuilder: PointBuilder
+  private nodeMap: Map<string, number>
 
   constructor(config: ConfigInterface) {
     this.pointBuilder = new PointBuilder(config);
     this.renderer = new Renderer(config, this.pointBuilder);
+    this.nodeMap = new Map()
   }
 
   getRenderer(): Renderer {
     return this.renderer;
+  }
+
+  makeCurrentlySelected(itemType: string, itemNumber: number | undefined) {
+    this.renderer.makeLabel(new Point(20, 20), `Currently selected: ${itemType}[${itemNumber}]`)
   }
 
   makeDisplacements(elements: Map<number, Element>, displacements: Map<Node, Displacement>, scaleFactor: number) {
@@ -36,69 +43,96 @@ export default class View {
       const p: Point = this.pointBuilder.getPointFromNode(node)
       const dp = this.getDisplacedPoint(p, d, scaleFactor)
 
-      this.renderer.makeDisplacementLabel(dp, `dx=${d.dx}, dy=${d.dy}`)
+      this.renderer.makeDisplacementLabel(dp, `(${(Math.round(d.dx * 10000) / 10)}, ${Math.round(d.dy * 10000) / 10})`);
     })
   }
 
   private getDisplacedPoint(p: Point, d: Displacement, scaleFactor: number) {
-    p.x -= d.dx * scaleFactor;
+    p.x += d.dx * scaleFactor;
     p.y -= d.dy * scaleFactor;
     return p
   }
 
   makeElements(elements: Map<number, Element>) {
-    elements.forEach(e => {
-      const p1: Point = this.pointBuilder.getPointFromNode(e.node1);
-      const p2: Point = this.pointBuilder.getPointFromNode(e.node2);
-
-      this.renderer.makeElement(p1, p2);
+    elements.forEach(element => {
+      this.makeElement(element)
     });
+  }
+
+  makeElement(e: Element) {
+    const p1: Point = this.pointBuilder.getPointFromNode(e.node1);
+    const p2: Point = this.pointBuilder.getPointFromNode(e.node2);
+
+    this.renderer.makeElement(p1, p2);
   }
 
   makeElementsLabels(elements: Map<number, Element>) {
-    elements.forEach((e, nodeNumber) => {
-      const p1: Point = this.pointBuilder.getPointFromNode(e.node1);
-      const p2: Point = this.pointBuilder.getPointFromNode(e.node2);
-
-      this.renderer.makeElementLabel(p1, p2, nodeNumber);
+    elements.forEach((e, elementNumber) => {
+      this.makeElementLabel(e, elementNumber)
     });
   }
 
-  makeNodes(nodes: Map<number, Node>) {
-    nodes.forEach(n => {
-      const p: Point = this.pointBuilder.getPointFromNode(n);
+  makeElementLabel(element: Element, elementNumber: number) {
+    const p1: Point = this.pointBuilder.getPointFromNode(element.node1);
+    const p2: Point = this.pointBuilder.getPointFromNode(element.node2);
 
-      this.renderer.makeNode(p);
+    this.renderer.makeElementLabel(p1, p2, elementNumber);
+  }
+
+  makeNodes(nodes: Map<number, Node>) {
+    nodes.forEach((n, nodeId) => {
+      this.makeNode(n, nodeId)
     });
+  }
+
+  makeNode(n: Node, nodeId: number): string {
+    const p: Point = this.pointBuilder.getPointFromNode(n);
+
+    const sceneNodeId = this.renderer.makeNode(p)
+    this.nodeMap.set(sceneNodeId, nodeId)
+
+    return sceneNodeId;
+  }
+
+  getNodeIdBySceneId(sceneId: string): number {
+    return this.nodeMap.get(sceneId);
   }
 
   makeNodesLabels(nodes: Map<number, Node>) {
     nodes.forEach((n, nodeNumber) => {
-      const p: Point = this.pointBuilder.getPointFromNode(n);
-
-      this.renderer.makeNodeLabel(p, nodeNumber);
+      this.makeNodeLabel(n, nodeNumber)
     });
+  }
+
+  makeNodeLabel(n: Node, nodeNumber: number) {
+    const p: Point = this.pointBuilder.getPointFromNode(n);
+    this.renderer.makeNodeLabel(p, nodeNumber);
   }
 
   makeSupports(boundaries: Map<Node, Boundary>) {
-    boundaries.forEach((b, node) => {
-      const p: Point = this.pointBuilder.getPointFromNode(node);
-
-      this.renderer.makeSupport(p, b.xFixed, b.yFixed);
+    boundaries.forEach((b, n) => {
+      this.makeSupport(b, n)
     });
   }
 
-  makeLoads(loads: Map<Node, Load>) {
-    loads.forEach((l, node) => {
-      const p: Point = this.pointBuilder.getPointFromNode(node);
+  makeSupport(b: Boundary, n: Node) {
+    const p: Point = this.pointBuilder.getPointFromNode(n);
+    this.renderer.makeSupport(p, b.xFixed, b.yFixed);
+  }
 
-      this.renderer.makeLoad(p, l.fx, l.fy);
+  makeLoads(loads: Map<Node, Load>) {
+    loads.forEach((l, n) => {
+      this.makeLoad(l, n)
     });
+  }
+
+  makeLoad(l: Load, n: Node) {
+    const p: Point = this.pointBuilder.getPointFromNode(n);
+    this.renderer.makeLoad(p, l.fx, l.fy);
   }
 
   makeCoordinateSystemIcon() {    
     const point = this.pointBuilder.getPointFromNode(new Node(0, 0));
-
     this.renderer.makeGlobalCoordinateSystemIcon(point);
   }
 
@@ -126,17 +160,4 @@ export default class View {
   private static roundToNearest = (value: number, int: number) => {
     return Math.round(value/int)*int
   }
-
-  updateView() {
-    this.renderer.update();
-  }
-
-  clear() {
-    this.renderer.clear();
-  }
-
-  // makeSth(x: number, y: number) {
-  //   const p: Point = new Point(x - scenePosition.x, y - scenePosition.y);
-  //   this.renderer.makeNode(p);
-  // }
 }
