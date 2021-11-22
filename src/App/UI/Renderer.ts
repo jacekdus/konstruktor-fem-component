@@ -1,59 +1,29 @@
 import Two from "two.js";
+import { ConfigInterface } from "../Config/ConfigInterface";
 
-import { ConfigInterface } from "./Config/ConfigInterface";
 import { Point, PointBuilder } from "./Point";
 
 export class Renderer {
   private scenePosition: {x: number, y: number};
-  private two
+  private two;
+  private twoResults;
+  public twoNodeGroup; 
 
   constructor(
     private config: ConfigInterface = config,
     private pointBuilder: PointBuilder = pointBuilder
-    
   ) {
     config.two.width = config.elements.container.clientWidth;
     this.two = new Two(config.two).appendTo(config.elements.container);
+    this.twoNodeGroup = this.two.makeGroup();
+    this.twoResults = this.two.makeGroup()
+    this.update();
+
+    config.elements.two.nodes = this.twoNodeGroup._renderer.elem;
     // this.createEventListeners();
     // this.scenePosition = this.updateScenePosition();
     // this.createEventListeners();
   }
-
-  // createEventListeners() {
-  //   // this.config.elements.container.addEventListener('resize', () => {
-  //   //   this.scenePosition = this.updateScenePosition();
-      
-  //   // });
-  //   // function mouseEvents(
-  //   //   // drawNodeCallback: Function, 
-  //   //   // updateSceneCallback: Function
-  //   // ) {
-
-  //   // }
-
-  //   this.config.elements.container.addEventListener('click', (event: { clientX: number; clientY: number; }) => {
-  //     const x = event.clientX;
-  //     const y = event.clientY;
-      
-  //     console.log(x, y)
-  //     // drawNodeCallback(x, y);
-  //     // updateSceneCallback();
-  //   })
-
-  //   new ResizeObserver(() => {
-  //     console.log('resize');
-  //     // const x = this.two.renderer.domElement.getBoundingClientRect().x;
-  //     // const y = this.two.renderer.domElement.getBoundingClientRect().y;
-  //     const x = this.config.elements.container.clientWidth;
-  //     const y = this.config.elements.container.clientHeight;
-  //     console.log(x, y);
-  //     this.two.renderer.width = x;
-  //     this.two.renderer.height = y;
-  //     this.update();
-  //     console.log(this.two.renderer.domElement);
-      
-  //   }).observe(this.config.elements.container);
-  // }
 
   setSceneSize() {
     this.two.renderer.setSize(this.config.two.width, this.config.two.height);
@@ -84,7 +54,7 @@ export class Renderer {
       this.two.add(hLoad);
     }
 
-    const label = this.makeLabel(p, `(${xValue}, ${yValue}) [kN]`);
+    const label = this.getLabel(p, `(${xValue / 1000}, ${yValue / 1000}) [kN]`);
     label.stroke = this.config.color.load;
     label.alignment = 'left';
     this.two.add(label);
@@ -127,39 +97,47 @@ export class Renderer {
     );
   }
 
-  makeNode(p: Point) {
+  makeNode(p: Point): string {
     const node = this.two.makeCircle(p.x, p.y, this.config.scaleFactor.node);
+    this.twoNodeGroup.add(node)
     this.update()
-    node._renderer.elem.addEventListener('click', () => {
-      node.fill = this._getRandomColor()
-      this.update()
-    })
+
+    return node._renderer.elem.id
   }
 
-  _getRandomColor() {
-    return 'rgb('
-      + Math.floor(Math.random() * 255) + ','
-      + Math.floor(Math.random() * 255) + ','
-      + Math.floor(Math.random() * 255) + ')';
-  }
-
-  makeNodeLabel(p: Point, id: string) {
-    const label = this.makeLabel(p, id);
+  makeNodeLabel(p: Point, id: number) {
+    const label = this.getLabel(p, id.toString());
     this.two.add(label);
+  }
+
+  enlargeNode(nodeId: number) {
+    const node = this.twoNodeGroup.getById(nodeId);
+    node.fill = 'blue'
+  }
+
+  restoreDefaultNodeSize(nodeId: number) {
+    const node = this.twoNodeGroup.getById(nodeId);
+    node.fill = '#FFF'
   }
 
   makeDisplacementLabel(p: Point, value: string) {
-    const label = this.makeLabel(p, value);
+    const label = this.getLabel(p, value);
     label.stroke = this.config.color.displacement;
-    this.two.add(label);
+    this.twoResults.add(label);
   }
 
-  makeLabel(p: Point, value: string) {
+  getLabel(p: Point, value: string) {
     return new Two.Text(
       value, 
       p.x + this.config.scaleFactor.nodeTextOffset, 
       p.y - this.config.scaleFactor.nodeTextOffset
     );
+  }
+
+  makeLabel(p: Point, value: string) {
+    const label = this.getLabel(p, value);
+    label.alignment = 'left'
+    this.two.add(label);
   }
 
   makeElement(p1: Point, p2: Point) {
@@ -171,6 +149,7 @@ export class Renderer {
 
   makeDisplacedElement(p1: Point, p2: Point) {
     const de = this.makeElement(p1, p2);
+    this.twoResults.add(de)
     de.stroke = this.config.color.displacement;
   }
 
@@ -187,6 +166,7 @@ export class Renderer {
       10
     );
     labelBackground.noStroke();
+    labelBackground.fill = '#f6fbff'
 
     const group = this.two.makeGroup(labelBackground, label);
     this.two.add(group);
@@ -277,12 +257,8 @@ export class Renderer {
   }
 
   makeGlobalCoordinateSystemIcon(p: Point) {
-    const csIcon = this.two.makePath(
-      p.x + this.config.scaleFactor.csIcon.icon , p.y,
-      p.x, p.y,
-      p.x, p.y - this.config.scaleFactor.csIcon.icon,
-      true
-    );
+    const xLine = this.two.makeLine(p.x + this.config.scaleFactor.csIcon.icon , p.y, p.x, p.y,)
+    const yLine = this.two.makeLine(p.x, p.y, p.x, p.y - this.config.scaleFactor.csIcon.icon)
 
     const xLabel = new Two.Text(
       'x', 
@@ -296,7 +272,7 @@ export class Renderer {
       p.y - ( this.config.scaleFactor.csIcon.icon + this.config.scaleFactor.csIcon.textOffset ) 
     );
 
-    const group = this.two.makeGroup(csIcon, xLabel, yLabel)
+    const group = this.two.makeGroup(xLine, yLine, xLabel, yLabel)
     this.two.add(group);
 
     group.stroke = 'red';
@@ -305,25 +281,22 @@ export class Renderer {
   makeCursor(p: Point) {
     const scaleFactor = this.config.scaleFactor.cursor;
 
-    const p1 = this.two.makeLine(p.x - scaleFactor, p.y, p.x + scaleFactor, p.y);
-    const p2 = this.two.makeLine(p.x, p.y - scaleFactor, p.x, p.y + scaleFactor);
+    const p1 = this.two.makeLine(p.x - scaleFactor, p.y, p.x - scaleFactor/2, p.y);
+    const p2 = this.two.makeLine(p.x, p.y - scaleFactor, p.x, p.y - scaleFactor/2);
+    
+    const p3 = this.two.makeLine(p.x + scaleFactor/2, p.y, p.x + scaleFactor, p.y);
+    const p4 = this.two.makeLine(p.x, p.y + scaleFactor/2, p.x, p.y + scaleFactor);
 
-    return this.two.makeGroup(p1, p2)
-  }  
-
-  // A better way to do it
-  // makeCursor() {
-  //   const scaleFactor = this.config.scaleFactor.cursor;
-  //   const {x, y} = config.cursor.position
-
-  //   const p1 = this.two.makeLine(x - scaleFactor, y, x + scaleFactor, y);
-  //   const p2 = this.two.makeLine(x, y - scaleFactor, x, y + scaleFactor);
-
-  //   return this.two.makeGroup(p1, p2)
-  // }
+    return this.two.makeGroup(p1, p2, p3, p4)
+  }
 
   remove(object: Object) {
     this.two.remove(object);
+  }
+
+  clearResults() {
+    this.remove(this.twoResults);
+    this.twoResults = this.two.makeGroup();
   }
 
   clear() {

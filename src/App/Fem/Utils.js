@@ -1,4 +1,4 @@
-import FemNode from "./FemNode";
+import { Node } from "../Model";
 
 const sin = Math.sin;
 const cos = Math.cos;
@@ -14,16 +14,16 @@ export const getTransformationMatrix = angle => [
 ];
 
 /**
- * @param {FemNode} firstNode 
- * @param {FemNode} secondNode 
+ * @param {Node} firstNode 
+ * @param {Node} secondNode 
  */
 export const calculateLength = (firstNode, secondNode) => {
 	return pow(pow(secondNode.x - firstNode.x, 2) + pow(secondNode.y - firstNode.y, 2), 0.5);
 }
 
 /**
- * @param {FemNode} firstNode
- * @param {FemNode} secondNode 
+ * @param {Node} firstNode
+ * @param {Node} secondNode 
  */
 export const calculateAngle = (firstNode, secondNode) => {
 	return atan((secondNode.y - firstNode.y) / (secondNode.x - firstNode.x));

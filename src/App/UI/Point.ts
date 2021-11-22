@@ -1,5 +1,5 @@
-import { ConfigInterface } from './Config/ConfigInterface';
-import { Node } from './Model';
+import { ConfigInterface } from '../Config/ConfigInterface';
+import { Node } from '../Model';
 
 export class Point {
   constructor(
