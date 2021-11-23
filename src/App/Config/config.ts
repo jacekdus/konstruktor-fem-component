@@ -28,12 +28,12 @@ export const config = ((): ConfigInterface => {
     },
     two: { 
       width: undefined, 
-      height: 350,
+      height: 600,
       autostart: true,
       fitted: false,
     },
     scaleFactor: {
-      model: 30,
+      model: 25,
       support: 20,
       load: 40,
       node: 7.5,

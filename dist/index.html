@@ -41,8 +41,8 @@
     <input type="radio" id="load-cb" name="activeMode" value="load">
     <label for="load-cb">Load</label>
 
-    <br>
-    Force:
+    <br><br>
+    Load:
     <br>
     <label for="fx-input">FX: </label>
     <input type="text" id="fx-input" placeholder="enter value in kN">
@@ -51,13 +51,27 @@
     <label for="fy-input">FY: </label>
     <input type="text" id="fy-input" placeholder="enter value in kN">
 
-    <br>
+    <br><br>
     Support type:
     <input type="checkbox" id="support-xFixed-cb" checked>
     <label for="support-xFixed-cb">xFixed</label>
 
     <input type="checkbox" id="support-yFixed-cb" checked>
     <label for="support-yFixed-cb">yFixed</label>
+
+    <br><br>
+    Elements material:
+    <select name="material">
+      <option>Steel</option>
+      <option>Concrete</option>
+    </select>
+
+    <br><br>
+    Elements section:
+    <select name="section">
+      <option>HEA 100</option>
+      <option>HEA 200</option>
+    </select>
 
   </fieldset>
 
