@@ -45,12 +45,15 @@ export class Renderer {
     if (yValue) {
       const vLoad = this.makeVerticalLoad(p, yValue);
       vLoad.stroke = this.config.color.load;
+      vLoad.fill = this.config.color.load;
+      vLoad.linewidth = 3;
       this.two.add(vLoad);
     }
 
     if (xValue) {
       const hLoad = this.makeHorizontalLoad(p, xValue);
       hLoad.stroke = this.config.color.load;
+      hLoad.fill = this.config.color.load;
       this.two.add(hLoad);
     }
 

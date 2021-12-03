@@ -44,8 +44,8 @@ export const config = ((): ConfigInterface => {
     color: {
       node: '',
       element: 'blue',
-      load: 'purple',
-      displacement: 'gray',
+      load: 'brown',
+      displacement: 'red',
       support: 'green'
     },
     translationValue: 75,
