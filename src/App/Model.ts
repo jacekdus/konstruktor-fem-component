@@ -5,10 +5,10 @@ export class Model {
   highestNodeId: number;
   highestElementId: number
 
-  _nodes?: Map<number, Node>;
-  _elements?: Map<number, Element | FemElement>;
-  _boundaries?: Map<Node, Boundary>;
-  _loads?: Map<Node, Load>;
+  _nodes: Map<number, Node>;
+  _elements: Map<number, Element | FemElement>;
+  _boundaries: Map<Node, Boundary>;
+  _loads: Map<Node, Load>;
   sections: Section[];
   materials: Material[];
   results?: {
