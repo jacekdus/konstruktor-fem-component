@@ -30,9 +30,9 @@ export class Model {
     }
   }
 
-  set nodes(nodes) {
-    this._nodes = nodes
-  }
+  // set nodes(nodes) {
+  //   this._nodes = nodes
+  // }
 
   get nodes() {
     return this._nodes

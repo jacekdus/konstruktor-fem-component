@@ -85,13 +85,11 @@ export default class View {
     });
   }
 
-  makeNode(n: Node, nodeId: number): string {
+  makeNode(n: Node, nodeId: number) {
     const p: Point = this.pointBuilder.getPointFromNode(n);
 
-    const sceneNodeId = this.renderer.makeNode(p)
+    const sceneNodeId = this.renderer.makeNode(p, nodeId);
     this.nodeMap.set(sceneNodeId, nodeId)
-
-    return sceneNodeId;
   }
 
   getNodeIdBySceneId(sceneId: string): number {

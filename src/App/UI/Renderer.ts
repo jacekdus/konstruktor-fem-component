@@ -8,6 +8,8 @@ export class Renderer {
   private two;
   private twoResults;
   public twoNodeGroup; 
+  public sceneObjectMap: Map<string, SceneObject>;
+  public sceneObjectLabelMap: Map<string, SceneObject>;
 
   constructor(
     private config: ConfigInterface = config,
@@ -20,6 +22,8 @@ export class Renderer {
     this.update();
 
     config.elements.two.nodes = this.twoNodeGroup._renderer.elem;
+    this.sceneObjectMap = new Map<string, SceneObject>();
+    this.sceneObjectLabelMap = new Map<string, SceneObject>();
     // this.createEventListeners();
     // this.scenePosition = this.updateScenePosition();
     // this.createEventListeners();
@@ -100,10 +104,12 @@ export class Renderer {
     );
   }
 
-  makeNode(p: Point): string {
+  makeNode(p: Point, nodeId: number): string {
     const node = this.two.makeCircle(p.x, p.y, this.config.scaleFactor.node);
     this.twoNodeGroup.add(node)
     this.update()
+
+    this.sceneObjectMap.set(node._renderer.elem.id, new SceneObject(nodeId, 'Node', node))
 
     return node._renderer.elem.id
   }
@@ -309,4 +315,12 @@ export class Renderer {
   update() {
     this.two.update();
   }
+}
+
+class SceneObject {
+  constructor(
+    public nodeId: number,
+    public type: string,
+    public obj: object
+  ) {}
 }
