@@ -3,10 +3,15 @@ import FemElement from './FemElement';
 
 
 export const getFemModel = (model: Model) => {
-  model.elements.forEach((e, elementNumber) => {
-    const femElement = new FemElement(e.material, e.section, e.node1, e.node2);
+  model.femElements.clear();
 
-    model.elements.set(elementNumber, femElement)
+  model.elements.forEach((e, elementNumber) => {
+    const node1 = model.nodes.get(e.node1Id);
+    const node2 = model.nodes.get(e.node2Id);
+    
+    const femElement = new FemElement(e.material, e.section, node1, node2);
+
+    model.setFemElement(femElement, elementNumber)
   });
 
   return model;

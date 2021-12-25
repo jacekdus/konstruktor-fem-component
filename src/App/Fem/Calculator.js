@@ -1,8 +1,8 @@
-import { matrix, multiply, inv, index, round, transpose } from 'mathjs';
+import { matrix, multiply, inv, index, round, transpose, subtract } from 'mathjs';
 import { GlobalStiffness } from './Matrix/GlobalStiffness'
 import { GlobalBoundary } from './Matrix/GlobalBoundary';
-import { GlobalForces } from "./Matrix/GlobalForces";
-import { Model, Displacement } from '../Model'
+import { GlobalLoads } from "./Matrix/GlobalLoads";
+import { Model, Displacement, Reaction } from '../Model'
 import { Fem } from './Fem';
 import { GlobalDisplacements } from './Matrix/GlobalDisplacement';
 import { results } from './Results';
@@ -18,25 +18,25 @@ export default class FemCalculator {
 	}
 
 	init() {
-		this.globalStiffness = new GlobalStiffness(this.femModel.nodes, this.femModel.elements);
+		this.globalStiffness = new GlobalStiffness(this.femModel.nodes, this.femModel.femElements);
 		this.globalStiffness.createNodeGlobalIndexMap();
 		this.globalStiffness.createGlobalStiffnessMatrix();
 
 		this.globalBoundary = new GlobalBoundary(this.femModel.boundaries, this.femModel.nodes);
-		this.globalForces = new GlobalForces(this.femModel.loads, this.femModel.nodes);
+		this.globalLoads = new GlobalLoads(this.femModel.loads, this.femModel.nodes);
 	}
 
 	calculate() {
 		this._calculateDisplacementsMatrix();
-		this._calculateReactionForces();
 		this._calculateInnerForces();
+		this._calculateReactionForces();
 	}
 
 	_calculateDisplacementsMatrix() {
 		const unboundedMatrixIndexes = this.globalBoundary.getUnboundedMatrixIndexes();
 
 		const unboundedGlobalStiffnessMatrix = this.globalStiffness.getSubsettedMatrix(unboundedMatrixIndexes);
-		const unboundedForcesMatrix = this.globalForces.getSubsettedMatrix(unboundedMatrixIndexes);
+		const unboundedForcesMatrix = this.globalLoads.getSubsettedMatrix(unboundedMatrixIndexes);
 		const unboundedDisplacements = Fem.calculateDisplacements(unboundedGlobalStiffnessMatrix, unboundedForcesMatrix);
 
 		const displacements = new GlobalDisplacements(this.globalBoundary.getMatrix().length);
@@ -46,31 +46,53 @@ export default class FemCalculator {
 
 		results.displacements = new Map();
 		this.femModel.nodes.forEach((node, index) => {
-			results.displacements.set(node, new Displacement(this.displacements[2 * (index - 1)], this.displacements[2 * (index - 1) + 1]));
+			results.displacements.set(index, new Displacement(this.displacements[2 * (index - 1)], this.displacements[2 * (index - 1) + 1]));
 		})
 	}
 
 	_calculateInnerForces() {
-		//REFACTOR			
-		this.femModel.elements.forEach(element => {
+		results.innerForces = new Map();
 
+		this.femModel.femElements.forEach((element, id) => {
 			const elementsGlobalIndexes = this.globalStiffness.getElementsGlobalIndexes(element);
+			
+			const subsettedDisplacements = matrix(this.displacements).subset(index(elementsGlobalIndexes));
 
-			const subsettedDisplacements = matrix(this.displacements).subset(index(elementsGlobalIndexes))
-			const elementsLocalForces = multiply(transpose(inv(element.transformationMatrix)), multiply(element.globalStiffnessMatrix, subsettedDisplacements)).toArray();
-			console.log(elementsGlobalIndexes)
-			console.log(subsettedDisplacements)
-			console.log(elementsLocalForces)
-			element.innerForces = elementsLocalForces;
+			const elementsLocalForces = multiply(
+				element.localStiffnessMatrix,
+				multiply(
+					element.transformationMatrix,
+					subsettedDisplacements
+				)
+			).toArray();
+
+			const localForce = elementsLocalForces[2] // for [2] tension with +, for [0] with -
+
+			results.innerForces.set(id, localForce);
 		});
 	}
 
 	_calculateReactionForces() {
-		this.globalReactionForcesMatrix = multiply(this.globalStiffness.getMatrix(), this.displacements);
+		const forces = this.globalForcesMatrix = multiply(this.globalStiffness.getMatrix(), this.displacements);
+		const reactions = subtract(forces, this.globalLoads.getMatrix());
+
+		results.reactions = new Map();
+		this.femModel.nodes.forEach((node, index) => {
+			const rfx = this._roundToThreeDecimalPlaces(reactions[2 * (index - 1)]);
+			const rfy = this._roundToThreeDecimalPlaces(reactions[2 * (index - 1) + 1]);
+
+			if (rfx !== 0 || rfy !== 0) {
+				results.reactions.set(index, new Reaction(rfx, rfy));
+			}
+		})
+	}
+
+	_roundToThreeDecimalPlaces(value) {
+		return Math.round(value * 1000) / 1000; 
 	}
 
 	_consoleLogInnerForcesResults() {
-		this.femModel.elements.forEach((element) => {
+		this.femModel.femElements.forEach((element) => {
 			console.log(round(element.innerForces, this.precision));
 		})
 	}

@@ -1,0 +1,37 @@
+{
+  "materials": [
+    {"id": 1, "name": "Steel", "youngsModulus": 210000000000.0}
+  ],
+  "sections": [
+    {"id": 1, "name": "HEA 100", "area": 0.00212}
+  ],
+  "nodes": [
+    {"id": 1, "x": 5,  "y": 0},
+    {"id": 2, "x": 10, "y": 0},
+    {"id": 3, "x": 15, "y": 0},
+    {"id": 4, "x": 20, "y": 0},
+    {"id": 5, "x": 5,  "y": 5},
+    {"id": 6, "x": 10, "y": 5},
+    {"id": 7, "x": 15, "y": 5}
+  ],
+  "elements": [
+    {"id": 1,  "node1": 1, "node2": 2, "section": 1, "material": 1},
+    {"id": 2,  "node1": 2, "node2": 3, "section": 1, "material": 1},
+    {"id": 3,  "node1": 3, "node2": 4, "section": 1, "material": 1},
+    {"id": 4,  "node1": 5, "node2": 2, "section": 1, "material": 1},
+    {"id": 5,  "node1": 6, "node2": 3, "section": 1, "material": 1},
+    {"id": 6,  "node1": 7, "node2": 4, "section": 1, "material": 1},
+    {"id": 7,  "node1": 5, "node2": 6, "section": 1, "material": 1},
+    {"id": 8,  "node1": 6, "node2": 7, "section": 1, "material": 1},
+    {"id": 9,  "node1": 5, "node2": 1, "section": 1, "material": 1},
+    {"id": 10, "node1": 6, "node2": 2, "section": 1, "material": 1},
+    {"id": 11, "node1": 7, "node2": 3, "section": 1, "material": 1}
+  ],
+  "boundaries": [
+    {"id": 1, "node": 1, "xFixed": true, "yFixed": true},
+    {"id": 2, "node": 5, "xFixed": true, "yFixed": false}
+  ],
+  "loads": [
+    {"id": 1, "node": 4, "fx": 0, "fy": -1000000}
+  ]
+}

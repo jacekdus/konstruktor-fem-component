@@ -8,12 +8,12 @@ export class GlobalBoundary {
   }
 
   _fill(boundaries, nodes) {
-    nodes.forEach(node => {
-      if (boundaries.has(node)) {
-        const boundary = boundaries.get(node)
-        this.boundaries.set(node, boundary)
+    nodes.forEach((node, nodeId) => {
+      if (boundaries.has(nodeId)) {
+        const boundary = boundaries.get(nodeId)
+        this.boundaries.set(nodeId, boundary)
       } else {
-        this.boundaries.set(node, new Boundary(false, false))
+        this.boundaries.set(nodeId, new Boundary(false, false))
       }
     })
   }
@@ -21,8 +21,9 @@ export class GlobalBoundary {
   getMatrix() {
     const matrix = []
     this.boundaries.forEach(boundary => {
+      
       matrix.push( + boundary.xFixed, + boundary.yFixed)
-    }) 
+    });
 
     return matrix
   }

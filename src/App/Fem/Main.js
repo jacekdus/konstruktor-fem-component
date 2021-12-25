@@ -12,7 +12,7 @@ export class Main {
 		// this.calculator.log();
 	}
 
-	getDisplacements() {
-		return this.calculator.getResults().displacements;
+	getResults() {
+		return this.calculator.getResults();
 	}
 }

@@ -7,9 +7,9 @@ const pow = Math.pow;
 
 /** @param {number} angle in radians */
 export const getTransformationMatrix = angle => [
-	[cos(angle), sin(angle), 0, 0],
+	[ cos(angle), sin(angle), 0, 0],
 	[-sin(angle), cos(angle), 0, 0],
-	[0, 0, cos(angle), sin(angle)],
+	[0, 0,  cos(angle), sin(angle)],
 	[0, 0, -sin(angle), cos(angle)]
 ];
 
@@ -26,5 +26,5 @@ export const calculateLength = (firstNode, secondNode) => {
  * @param {Node} secondNode 
  */
 export const calculateAngle = (firstNode, secondNode) => {
-	return atan((secondNode.y - firstNode.y) / (secondNode.x - firstNode.x));
+	return Math.atan2(secondNode.y - firstNode.y, secondNode.x - firstNode.x);
 }

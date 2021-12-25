@@ -18,6 +18,7 @@ export class GlobalStiffness {
 
 		this.femElements.forEach(element => {
 			const globalIndex = this.nodeGlobalIndexMap.get(element.node1).concat(this.nodeGlobalIndexMap.get(element.node2))
+
 			element.globalStiffnessMatrix.forEach((row, rowIndex) => {
 				row.forEach((value, columnIndex) => {
 					this.matrix[globalIndex[rowIndex]][globalIndex[columnIndex]] += value
@@ -38,30 +39,12 @@ export class GlobalStiffness {
   getElementsGlobalIndexes(element) {
 		const temp = this._getGlobalIndexArray(element.node1);
 		const elementsGlobalIndexes = temp.concat(this._getGlobalIndexArray(element.node2));
-
+		
 		return elementsGlobalIndexes;
 	}
 
 	_getGlobalIndexArray(node) {
 		return this.nodeGlobalIndexMap.get(node);
-	}
-
-	/**
-	 * 
-	 * @param {Array} boundedMatrixIndexes 
-	 */
-	boundGlobalStiffnessMatrix(boundedMatrixIndexes) {
-		const boundedMatrix = this.matrix
-
-		boundedMatrix.forEach((row, i) => {
-			row.forEach((col, j) => {
-				if (boundedMatrixIndexes.includes(i) || boundedMatrixIndexes.includes(j)) {
-					boundedMatrix[i][j] = 0;
-				}
-			});
-		});
-
-		return boundedMatrix;
 	}
 
 	getSubsettedMatrix(subsettedMatrixIndexes) {

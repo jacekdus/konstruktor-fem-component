@@ -1,3 +1,4 @@
+import { modelToJsonModel } from "../utils";
 import FemElement from "./Fem/FemElement";
 
 
@@ -6,16 +7,18 @@ export class Model {
   highestElementId: number
 
   _nodes: Map<number, Node>;
-  _elements: Map<number, Element | FemElement>;
-  _boundaries: Map<Node, Boundary>;
-  _loads: Map<Node, Load>;
+  _elements: Map<number, Element>;
+  _boundaries: Map<number, Boundary>;
+  _loads: Map<number, Load>;
   sections: Section[];
   materials: Material[];
   results?: {
-    displacements?: Map<Node, Displacement>,
-    // forces: Force[]
-    // reactions: Reaction[]
+    displacements?: Map<number, Displacement>,
+    innerForces?: Map<number, number>
+    reactions?: Map<number, Reaction>
   };
+  
+  _femElements: Map<number, FemElement>;
 
   constructor() {
     this.highestNodeId = 0;
@@ -23,51 +26,57 @@ export class Model {
 
     this._nodes = new Map<number, Node>();
     this._elements = new Map<number, Element>();
-    this._boundaries = new Map<Node, Boundary>();
-    this._loads = new Map<Node, Load>();
+    this._boundaries = new Map<number, Boundary>();
+    this._loads = new Map<number, Load>();
+    this.sections = [];
+    this.materials = [];
     this.results = {
-      displacements: undefined
-    }
-  }
+      displacements: undefined,
+      innerForces: undefined,
+      reactions: undefined
+    };
 
-  // set nodes(nodes) {
-  //   this._nodes = nodes
-  // }
+    this._femElements = new Map<number, FemElement>();
+  }
 
   get nodes() {
     return this._nodes
   }
 
-  set elements(elements: Map<number, Element | FemElement>) {
+  set elements(elements: Map<number, Element>) {
     this._elements = elements
   }
 
-  get elements(): Map<number, Element | FemElement> {
+  get elements(): Map<number, Element> {
     return this._elements
   }
 
-  set boundaries(boundaries: Map<Node, Boundary>) {
+  set boundaries(boundaries: Map<number, Boundary>) {
     this._boundaries = boundaries
   }
 
-  get boundaries(): Map<Node, Boundary> {
+  get boundaries(): Map<number, Boundary> {
     return this._boundaries
   }
 
-  set loads(loads: Map<Node, Load>)  {
+  set loads(loads: Map<number, Load>)  {
     this._loads = loads
   }
 
-  get loads(): Map<Node, Load> {
+  get loads(): Map<number, Load> {
     return this._loads
   }
 
-  setLoad(node: Node, load: Load) {
-    this._loads.set(node, load)
+  get femElements(): Map<number, FemElement> {
+    return this._femElements;
   }
 
-  setBoundary(node: Node, boundary: Boundary): void {
-    this._boundaries.set(node, boundary)
+  setLoad(nodeId: number, load: Load) {
+    this._loads.set(nodeId, load)
+  }
+
+  setBoundary(nodeId: number, boundary: Boundary): void {
+    this._boundaries.set(nodeId, boundary)
   }
 
   setNode(node: Node): number {
@@ -94,6 +103,10 @@ export class Model {
     return this.highestElementId
   }
 
+  setFemElement(femElement: FemElement, elementId: number) {
+    this._femElements.set(elementId, femElement);
+  }
+
   deleteElement(elementId: number) {
     if (this._elements.has(elementId)) {
       this._elements.delete(elementId)
@@ -102,6 +115,10 @@ export class Model {
 
   getElement(elementId: number): Element {
     return this._elements.get(elementId)
+  }
+
+  getJsonModel(): string {
+    return modelToJsonModel(this);
   }
 }
 
@@ -154,8 +171,8 @@ export class Section {
 
 export class Element {
   constructor(
-    public node1: Node,
-    public node2: Node,
+    public node1Id: number,
+    public node2Id: number,
     public section: Section,
     public material: Material
   ) {}

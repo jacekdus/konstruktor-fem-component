@@ -19,7 +19,6 @@ export default class FemElement {
 		this.transformationMatrix = getTransformationMatrix(this.angle);
 		this.localStiffnessMatrix = this.createLocalStiffnessMatrix();
 		this.globalStiffnessMatrix = this.createGlobalStiffnessMatrix();
-		this.innerForces = [];
 	}
 
 	createLocalStiffnessMatrix() {

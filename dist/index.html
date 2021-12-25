@@ -10,84 +10,109 @@
       margin: 0px
     }
     #container {
+      font-family: Arial, Helvetica, sans-serif;
       height: 350;
       background-color: #f6fbff;
+      position: relative;
     }
-    #plus-btn, #minus-btn, #calc-btn {
-      color: blue;
-      height: 50px;
-      font-size: 30px;
-      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    nav {
+      margin: 0;
+      position: absolute;
+    }
+    nav ul {
+      background-color: rgb(220, 230, 250);
+      padding: 10px;
+      list-style-type: none;
+    }
+    nav input[type=number] {
+      width: 50px;
+    }
+    nav>div>label {
+      font-weight: bold;
+    }
+    .right-nav {
+      right: 10px;
+      top: 10px;
+    }
+    .left-nav {
+      left: 10px;
+      top: 10px;
     }
   </style>
 </head>
 <body>
-  <div id="container"></div>
-  <button id="plus-btn">+</button>
-  <button id="minus-btn">-</button>
-  <button id="calc-btn">Calculate</button>
-
-  <fieldset id="mode">
-    Mode:
-    <input type="radio" id="node-cb" name="activeMode" value="node" checked>
-    <label for="node-cb">Node</label>
-
-    <input type="radio" id="element-cb" name="activeMode" value="element">
-    <label for="element-cb">Element</label>
-
-    <input type="radio" id="support-cb" name="activeMode" value="support">
-    <label for="support-cb">Support</label>
-
-    <input type="radio" id="load-cb" name="activeMode" value="load">
-    <label for="load-cb">Load</label>
-
-    <br><br>
-    Load:
-    <br>
-    <label for="fx-input">FX: </label>
-    <input type="text" id="fx-input" placeholder="enter value in kN">
-
-    <br>
-    <label for="fy-input">FY: </label>
-    <input type="text" id="fy-input" placeholder="enter value in kN">
-
-    <br><br>
-    Support type:
-    <input type="checkbox" id="support-xFixed-cb" checked>
-    <label for="support-xFixed-cb">xFixed</label>
-
-    <input type="checkbox" id="support-yFixed-cb" checked>
-    <label for="support-yFixed-cb">yFixed</label>
-
-    <br><br>
-    Elements material:
-    <select name="material">
-      <option>Steel</option>
-      <option>Concrete</option>
-    </select>
-
-    <br><br>
-    Elements section:
-    <select name="section">
-      <option>HEA 100</option>
-      <option>HEA 200</option>
-    </select>
-
-  </fieldset>
-
-  <fieldset id="show">
-    <input type="checkbox" id="nodes" checked>
-    <label for="nodes">Nodes</label>
-
-    <input type="checkbox" id="elements" checked>
-    <label for="elements">Elements</label>
-
-    <input type="checkbox" id="supports" checked>
-    <label for="supports">Supports</label>
-
-    <input type="checkbox" id="all" checked>
-    <label for="supports">All</label>
-  </fieldset>
+  <div id="container">
+    <div id="scene"></div>
+    <nav id="scene-visibility" class="nav right-nav">
+      <div>
+        <label>Elements: </label>
+        <ul>
+          <li><label><input type="checkbox" value="nodes" checked>Nodes</label></li>
+          <li><label><input type="checkbox" value="elements" checked>Elements</label></li>
+          <li><label><input type="checkbox" value="supports" checked>Supports</label></li>
+          <li><label><input type="checkbox" value="loads" checked>Loads</label></li>
+          <li><label><input type="checkbox" value="labels" checked>Labels</label></li>
+        </ul>
+      </div>
+      <div>
+        <label>Results: </label>
+        <ul>
+          <li><label><input type="checkbox" value="displacements" disabled>Displacements</label></li>
+          <li><label><input type="checkbox" value="forces" disabled>Axial force</label></li>
+          <li><label><input type="checkbox" value="reactions" disabled>Reactions</label></li>
+        </ul>
+      </div>
+      <div>
+        <button id="calc-btn">Calculate</button>
+      </div>
+    </nav>
+    <nav id="creator" class="nav left-nav">
+      <div id="mode">
+        <label>Mode: </label>
+        <ul>
+          <li><label><input type="radio" name="mode" value="node" checked>Node</label></li>
+          <li><label><input type="radio" name="mode" value="element" >Element</label></li>
+          <li><label><input type="radio" name="mode" value="support" >Support</label></li>
+          <li><label><input type="radio" name="mode" value="load" >Load</label></li>
+        </ul>
+      </div>
+      <div id="element-toolbox" hidden>
+        <label>Element: </label>
+        <ul>
+          <li class="select-list-item">
+            <label>Select material: 
+              <select name="material">
+                <option>Steel</option>
+                <option>Concrete</option>
+              </select>
+            </label>
+          </li>
+          <li class="select-list-item">
+            <label>Select section: 
+              <select name="section">
+                <option>HEA 100</option>
+                <option>HEA 200</option>
+              </select>
+            </label>
+          </li>
+        </ul>
+      </div>
+      <div id="support-toolbox" hidden>
+        <label>Support: </label>
+        <ul>
+          <li><label><input type="checkbox" id="support-xFixed-cb" checked>xFixed</label></li>
+          <li><label><input type="checkbox" id="support-yFixed-cb" checked>yFixed</label></li>
+        </ul>
+      </div>
+      <div id="load-toolbox" hidden>
+        <label>Load: </label>
+        <ul>
+          <li><label>FX <input type="number" id="fx-input" name="mode"> kN</label></li>
+          <li><label>FY <input type="number" id="fy-input" name="mode"> kN</label></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
 
   <script src="main.js"></script>
 </body>

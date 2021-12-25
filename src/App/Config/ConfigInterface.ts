@@ -3,27 +3,23 @@ import { Mode } from './modeEnum'
 
 export interface ConfigInterface {
   elements: {
-    plusBtn: HTMLElement;
-    minusBtn: HTMLElement;
-    container: HTMLElement;
+    scene: HTMLElement;
     calcBtn: HTMLElement;
-    nodesCheckbox: HTMLInputElement,
-    elementsCheckbox: HTMLInputElement,
-    supportsCheckbox: HTMLInputElement,
-    allCheckbox: HTMLInputElement,
-    modes: NodeListOf<HTMLInputElement>,      
+    sceneVisibility: HTMLElement;
+    modes: HTMLElement,      
     two: {
       nodes: undefined | HTMLElement
     }
-    forceInput: {
+    toolbox: {
+      element: HTMLElement,
+      support: HTMLElement,
+      load: HTMLElement,
       fx: HTMLInputElement,
-      fy: HTMLInputElement
-    },
-    support: {
+      fy: HTMLInputElement,
       xFixed: HTMLInputElement,
       yFixed: HTMLInputElement
-    },
-  },
+    }
+  } | null,
   two: { 
     width: number,
     height: number,
@@ -38,6 +34,7 @@ export interface ConfigInterface {
     nodeTextOffset: number,
     csIcon: { icon: number, textOffset: number },
     cursor: number,
+    displacements: number
   },
   color: {
     node: string,
@@ -45,16 +42,20 @@ export interface ConfigInterface {
     load: string,
     displacement: string,
     support: string,
+    reaction: string
   },
   translationValue: number,
   screenScalingFactor: number,
-  mode: Mode,
-  modeState: {
-    createElement: {
-      selectedNode: Node | undefined,
-      secondNode: Node | undefined,
-      currentSection: Section,
-      currentMaterial: Material
+  mode: {
+    name: Mode,
+    toolbox: HTMLElement | undefined,
+    state: {
+      createElement: {
+        selectedNodeId: number | undefined,
+        secondNode: number | undefined,
+        currentSection: Section,
+        currentMaterial: Material
+      }
     }
   },
   selected?: Node | Element
@@ -62,6 +63,19 @@ export interface ConfigInterface {
     nodes: boolean,
     elements: boolean,
     supports: boolean,
+    loads: boolean
+    labels: {
+      all: boolean,
+      // nodes: boolean,
+      // elements: boolean,
+      // supports: boolean,
+      // loads: boolean
+    },
+    results: {
+      displacements: boolean,
+      innerForces: boolean,
+      reactions: boolean
+    }
   },
   cursor: {
     snap: {
@@ -72,6 +86,12 @@ export interface ConfigInterface {
       x: number, 
       y: number,
     },
-    two: any,
+    message: string;
+  },
+  results: {
+    axialForce: {
+      max: number | undefined,
+      min: number | undefined
+    }
   }
 }

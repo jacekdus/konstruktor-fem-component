@@ -1,8 +1,8 @@
 export enum Mode {
-  Node,
-  Element,
-  Support,
-  Load,
-  Select,
-  Delete
+  Node = 'node',
+  Element = 'element',
+  Support = 'support',
+  Load = 'load',
+  Select = 'select',
+  Delete = 'delete'
 }

@@ -1,303 +1,297 @@
-import { Model, Displacement, Node, Element, Boundary, Load } from './Model';
+import { Model, Node, Element, Boundary, Load } from './Model';
 import View from "./View";
 import { config } from "./Config/config";
 import { Main as Calculator } from "./Fem/Main";
 import { Mode } from './Config/modeEnum'
 import { isInteger } from 'mathjs';
+import ResultsUtils from './UI/ResultsUtils';
 
 
 export default class Controller {
-  private maxDisplacementSizeInPx: number = 20;
-
   constructor(
-    private model: Model = model,
-    private view: View = view
+    private model: Model, 
+    private view: View
   ) {}
 
-  private getMaxAbsDisplacementValue(displacements: Map<Node, Displacement>) {
-    let absMax = 0;
+  init() {
+    this.setScene();
+    this.renderScene();
+    this.addEventListeners();
+  }
 
-    displacements.forEach(d => {
-      if (absMax < Math.abs(d.dx)) {
-        absMax = d.dx;
-      }
+  getJsonModel(): string {
+    return this.model.getJsonModel();
+  }
 
-      if (absMax < Math.abs(d.dy)) {
-        absMax = d.dy;
-      }
-    });
+  private setScene() {
+    this.view.setNodes(this.model.nodes);
+    this.view.setElements(this.model.elements, this.model.nodes);
+    this.view.setSupports(this.model.boundaries, this.model.nodes);
+    this.view.setLoads(this.model.loads, this.model.nodes);
 
-    return Math.abs(absMax);
+    this.view.setDimensions()
+    this.view.setCoordinateSystemIcon()
+    // this.view.setBorder()
+    this.view.setCursor()
+  }
+
+  private renderScene() {
+    this.view.render();
   }
 
   private addEventListeners() {
-    const {plusBtn, minusBtn, nodesCheckbox, 
-      elementsCheckbox, supportsCheckbox, modes, 
-      allCheckbox, container, two, calcBtn} = config.elements;
+    const {modes, sceneVisibility, scene, two, calcBtn} = config.elements;
 
-    plusBtn.addEventListener('click', this.handleZoomIn.bind(this));
-    minusBtn.addEventListener('click', this.handleZoomOut.bind(this));
-    window.addEventListener('resize', this.handleResizeSceneToContainersSize.bind(this));
-    nodesCheckbox.addEventListener('click', this.handleNodesVisibility.bind(this));
-    elementsCheckbox.addEventListener('click', this.handleElementsVisibility.bind(this));
-    supportsCheckbox.addEventListener('click', this.handleSupportsVisibility.bind(this));
-    allCheckbox.addEventListener('click', event => {
-      if ((<HTMLInputElement>event.target).checked) {
-        config.isVisible.nodes = true;
-        config.isVisible.elements = true;
-        config.isVisible.supports = true;
+    window.addEventListener('resize', this.handleResizeSceneToContainersSize.bind(this))
 
-        nodesCheckbox.checked = true;
-        elementsCheckbox.checked = true;
-        supportsCheckbox.checked = true;
-      } else {
-        config.isVisible.nodes = false;
-        config.isVisible.elements = false;
-        config.isVisible.supports = false;
+    calcBtn.addEventListener('click', this.handleCalculate.bind(this))
 
-        nodesCheckbox.checked = false;
-        elementsCheckbox.checked = false;
-        supportsCheckbox.checked = false;
-      }
-    })
-    modes.forEach(mode => {
-      mode.addEventListener('click', () => {
-        this.handleCurrentActiveMode(mode);
-      });
-    });
-    container.addEventListener('mousemove', this.handleCursorMove.bind(this))
-    container.addEventListener('click', this.handleMouseClickOnContainer.bind(this))
+    sceneVisibility.addEventListener('click', this.handleSceneVisibility.bind(this))
+    scene.addEventListener('mousemove', this.handleCursorMove.bind(this))
+    scene.addEventListener('mousewheel', this.handleMousewheel.bind(this))
+    scene.addEventListener('click', this.handleMouseClickOnContainer.bind(this))
+    
+    modes.addEventListener('change', this.handleCurrentActiveMode.bind(this))
+
     two.nodes.addEventListener('mouseover', this.handleMouseOverNode.bind(this))
     two.nodes.addEventListener('mouseout', this.handleMouseLeaveNode.bind(this))
-    calcBtn.addEventListener('click', this.handleCalculate.bind(this))
+  }
+
+  private handleMousewheel(event: any) {
+    var dy = (event.wheelDeltaY || -event.deltaY) / 1000;
+
+    if (dy > 0) {
+      config.scaleFactor.model *= 1 / config.screenScalingFactor
+    } else {
+      config.scaleFactor.model *= config.screenScalingFactor
+    }
+
+    // Ideally objects shouldn't be rerendered but their position should be updated
+    this.view.clearSceneObjects();
+    this.setScene();
+    this.renderScene();
+  }
+
+  private handleCurrentActiveMode(event: any) {
+    if (event.target.type === 'radio') {
+      this.hideToolbox(this.getToolboxHTMLElement(config.mode.name));
+      config.mode.name = event.target.value
+      this.showToolbox(config.mode.name);
+    }
+  }
+  
+  private showToolbox(mode: Mode) {
+    const toolbox = this.getToolboxHTMLElement(mode)
+    if (toolbox) {
+      toolbox.hidden = false
+    }
+
+    return toolbox;
+  }
+
+  private hideToolbox(toolbox: HTMLElement) {
+    if (toolbox) {
+      toolbox.hidden = true;
+    }
+
+    return toolbox;
+  }
+
+  private getToolboxHTMLElement(mode: Mode) {
+    switch(mode) {
+      case Mode.Element:
+        return config.elements.toolbox.element;
+      case Mode.Support:
+        return config.elements.toolbox.support;
+      case Mode.Load:
+        return config.elements.toolbox.load;
+      default:
+        return undefined;
+    }
+  }
+  
+  private handleResizeSceneToContainersSize() {
+    config.two.width = config.elements.scene.clientWidth;
+
+    this.view.setInnerForcesLegendPosition();
+    this.view.resizeScene();
+  }
+
+  private handleMouseOverNode(event: any) {
+    const sceneNodeId = event.target.id
+    this.view.highlightNode(sceneNodeId);
+  }
+
+  private handleMouseLeaveNode(event: any) {
+    const sceneNodeId = event.target.id
+    this.view.unHighlightNode(sceneNodeId);
+  }
+
+  private handleSceneVisibility(event: any) {
+    if (event.target.type === 'checkbox') {
+      if (event.target.value === 'nodes') {
+        config.isVisible.nodes = !config.isVisible.nodes;
+      }
+
+      if (event.target.value === 'elements') {
+        config.isVisible.elements = !config.isVisible.elements;
+      }
+
+      if (event.target.value === 'supports') {
+        config.isVisible.supports = !config.isVisible.supports;
+      }
+
+      if (event.target.value === 'loads') {
+        config.isVisible.loads = !config.isVisible.loads;
+      }
+
+      if (event.target.value === 'labels') {
+        config.isVisible.labels.all  = !config.isVisible.labels.all;
+      }
+
+      if (event.target.value === 'displacements') {
+        config.isVisible.results.displacements  = !config.isVisible.results.displacements;
+      }
+
+      if (event.target.value === 'forces') {
+        config.isVisible.results.innerForces  = !config.isVisible.results.innerForces;
+      }
+
+      if (event.target.value === 'reactions') {
+        config.isVisible.results.reactions  = !config.isVisible.results.reactions;
+      }
+
+      this.view.render();
+    }
   }
 
   private handleCalculate() {
-    this.view.getRenderer().clearResults();
-    this.view.getRenderer().update()
     const calculator = new Calculator(this.model)
     calculator.calculate();
-    this.model.results.displacements = calculator.getDisplacements();
-    this.view.makeDisplacements(this.model.elements, this.model.results.displacements, this.getDisplacementsScaleFactor());
-    this.view.makeDisplacementLabels(this.model.results.displacements, this.getDisplacementsScaleFactor());
+    this.model.results = calculator.getResults();
+    ResultsUtils.setDisplacementsScaleFactor(this.model.results.displacements, config);
+
+    this.view.clearResults();
+    this.view.setDisplacements(this.model.elements, this.model.results.displacements, this.model.nodes);
+    this.view.setInnerForces(this.model.elements, this.model.results.innerForces, this.model.nodes);
+    this.view.setInnerForceLegend();
+    this.view.setReactions(this.model.results.reactions, this.model.nodes);
+
+    const displacements: HTMLInputElement = config.elements.sceneVisibility.querySelector('input[value=displacements]');
+    const innerForces: HTMLInputElement = config.elements.sceneVisibility.querySelector('input[value=forces]');
+    const reactions: HTMLInputElement = config.elements.sceneVisibility.querySelector('input[value=reactions]');
+    [displacements, innerForces, reactions].forEach(el => el.disabled = false);
   }
 
   private handleCursorMove(event: any) {
-    let currentPosition: Node = this.view.getNodePositionFromCursorPosition(event.pageX, event.pageY);
-      const {x, y} = config.cursor.position
-      if (x !== currentPosition.x || y !== currentPosition.y) {
-        this.view.getRenderer().remove(config.cursor.two);
-        config.cursor.position.x = currentPosition.x;
-        config.cursor.position.y = currentPosition.y;
-        config.cursor.two = this.view.makeCursor(currentPosition.x, currentPosition.y);
-      }
+    const currentPosition: Node = this.view.getNodePositionFromCursorPosition(event.pageX, event.pageY);
+    const {x, y} = config.cursor.position
+
+    if (x !== currentPosition.x || y !== currentPosition.y) {
+      config.cursor.position.x = currentPosition.x;
+      config.cursor.position.y = currentPosition.y;
+      config.cursor.message = `${currentPosition.x.toFixed(1)}, ${currentPosition.y.toFixed(1)}`;
+
+      this.view.moveCursor(currentPosition.x, currentPosition.y);
+      this.view.updateCursorPositionLabel();
+    }
   }
 
   private handleMouseClickOnContainer(event: any) {
 
     // CREATE NODE
-    if (config.mode === Mode.Node) {
+    if (config.mode.name === Mode.Node) {
       const node: Node = this.view.getNodePositionFromCursorPosition(event.pageX, event.pageY);
       const nodeId = this.model.setNode(node)
-      this.view.makeNode(node, nodeId)
-      this.view.makeNodeLabel(node, nodeId);
+      this.view.setNode(node, nodeId)
     }
 
     // CREATE ELEMENT
-    if (config.mode === Mode.Element) {
+    if (config.mode.name === Mode.Element) {
 
-      if (!config.modeState.createElement.selectedNode) {
+      if (!config.mode.state.createElement.selectedNodeId) {
         const sceneId: string = event.target.id
-        const nodeId = this.view.getNodeIdBySceneId(sceneId);
+        const nodeId = this.view.sceneNodeIdToNodeId.get(sceneId);
 
         if (nodeId) {
-          const node: Node = this.model.getNode(nodeId);
-          config.modeState.createElement.selectedNode = node
+          // const node: Node = this.model.getNode(nodeId);
+          config.mode.state.createElement.selectedNodeId = nodeId
         } else {
           const node: Node = this.view.getNodePositionFromCursorPosition(event.pageX, event.pageY);
           const nodeId: number = this.model.setNode(node)
   
-          this.view.makeNode(node, nodeId)
-          this.view.makeNodeLabel(node, nodeId);
+          this.view.setNode(node, nodeId)
   
-          config.modeState.createElement.selectedNode = node
+          config.mode.state.createElement.selectedNodeId = nodeId
         }
-
       } else {
         const sceneId: string = event.target.id
-        const nodeId = this.view.getNodeIdBySceneId(sceneId);
+        const nodeId = this.view.sceneNodeIdToNodeId.get(sceneId);
 
         if (nodeId) {
-          const node: Node = this.model.getNode(nodeId);
-          this._createElement(config.modeState.createElement.selectedNode, node)
+          // const node: Node = this.model.getNode(nodeId);
+          this.createElement(config.mode.state.createElement.selectedNodeId, nodeId)
         } else {
           const node: Node = this.view.getNodePositionFromCursorPosition(event.pageX, event.pageY);
           const nodeId: number = this.model.setNode(node)
   
-          this.view.makeNode(node, nodeId)
-          this.view.makeNodeLabel(node, nodeId);
+          this.view.setNode(node, nodeId)
   
-          this._createElement(config.modeState.createElement.selectedNode, node)
+          this.createElement(config.mode.state.createElement.selectedNodeId, nodeId)
         }
       }
     }
 
     // CREATE SUPPORT
-    if (config.mode === Mode.Support) {
+    if (config.mode.name === Mode.Support) {
       const sceneId: string = event.target.id 
-      const nodeId = this.view.getNodeIdBySceneId(sceneId);
+      const nodeId = this.view.sceneNodeIdToNodeId.get(sceneId);
 
       if (nodeId) {
         const node = this.model.getNode(nodeId);
 
-        const xFixed: boolean = config.elements.support.xFixed.checked;
-        const yFixed: boolean = config.elements.support.yFixed.checked;
+        const xFixed: boolean = config.elements.toolbox.xFixed.checked;
+        const yFixed: boolean = config.elements.toolbox.yFixed.checked;
         const boundary = new Boundary(xFixed, yFixed)
 
-        this.model.setBoundary(node, boundary)
+        this.model.setBoundary(nodeId, boundary)
 
-        this.view.makeSupport(boundary, node)
+        this.view.setSupport(boundary, node)
       }
     }
 
     // CREATE LOAD
-    if (config.mode === Mode.Load) {
+    if (config.mode.name === Mode.Load) {
       const sceneId: string = event.target.id 
-      const nodeId = this.view.getNodeIdBySceneId(sceneId);
+      const nodeId = this.view.sceneNodeIdToNodeId.get(sceneId);
 
       if (nodeId) {
         const node = this.model.getNode(nodeId);
 
-        const fx: number = parseInt(config.elements.forceInput.fx.value);
-        const fy: number = parseInt(config.elements.forceInput.fy.value);
+        const fx: number = parseInt(config.elements.toolbox.fx.value);
+        const fy: number = parseInt(config.elements.toolbox.fy.value);
         
         if (isInteger(fx) && isInteger(fy) && !(fy === 0 && fx === 0)) {
           const load = new Load(fx * 1000, fy * 1000)
-          this.model.setLoad(node, load)
+          this.model.setLoad(nodeId, load)
   
-          this.view.makeLoad(load, node)
+          this.view.setLoad(load, node)
         }
       }
     }
   }
+  
+  private createElement(node1Id: number, node2Id: number) {
+    const element = new Element(node1Id, node2Id, config.mode.state.createElement.currentSection, 
+      config.mode.state.createElement.currentMaterial);
 
-  private _createElement(node1: Node, node2: Node) {
-    const element = new Element(node1, node2, config.modeState.createElement.currentSection, 
-      config.modeState.createElement.currentMaterial);
+    const node1 = this.model.nodes.get(node1Id);
+    const node2 = this.model.nodes.get(node2Id);
 
     const elementId = this.model.setElement(element);
-    this.view.makeElement(element);
-    this.view.makeElementLabel(element, elementId)
+    this.view.setElement(elementId, node1, node2);
 
-    config.modeState.createElement.selectedNode = undefined;
-    config.modeState.createElement.secondNode = undefined;
+    config.mode.state.createElement.selectedNodeId = undefined;
+    config.mode.state.createElement.secondNode = undefined;
   }
-
-  private handleMouseOverNode(event: any) {
-    const twoNodeId = event.target.id
-    this.view.getRenderer().enlargeNode(twoNodeId);
-  }
-
-  private handleMouseLeaveNode(event: any) {
-    const twoNodeId = event.target.id
-    this.view.getRenderer().restoreDefaultNodeSize(twoNodeId);
-  }
-
-  private handleResizeSceneToContainersSize() {
-    config.two.width = config.elements.container.clientWidth;
-    config.two.height = config.elements.container.clientHeight-4;
-  
-    this.view.getRenderer().setSceneSize();
-  }
-
-  private handleZoomIn() {
-    config.scaleFactor.model /= config.screenScalingFactor;
-    this.update()
-  }
-
-  private handleZoomOut() {
-    config.scaleFactor.model *= config.screenScalingFactor;
-    this.update()
-  }
-
-  private handleNodesVisibility() {
-    config.isVisible.nodes = !config.isVisible.nodes;
-  }
-
-  private handleElementsVisibility() {
-    config.isVisible.elements = !config.isVisible.elements;
-  }
-
-  private handleSupportsVisibility() {
-    config.isVisible.supports = !config.isVisible.supports
-  }
-
-  private handleCurrentActiveMode(mode: HTMLInputElement) {
-    switch (mode.value) {
-      case 'node':
-        config.mode = Mode.Node;
-        break;
-      case 'element':
-        config.mode = Mode.Element;
-        break;
-      case 'support':
-        config.mode = Mode.Support;
-        break;
-      case 'load':
-        config.mode = Mode.Load;
-        break;
-    }
-  }
-
-  private getDisplacementsScaleFactor() {
-    const maxAbsDisplacementValue: number = this.getMaxAbsDisplacementValue(this.model.results.displacements);
-    return this.maxDisplacementSizeInPx / maxAbsDisplacementValue;
-  }
-
-  init() {
-    this.makeAll();
-    this.addEventListeners();
-  }
-
-  update() {
-    this.view.getRenderer().clear()
-    this.init()
-  }
-
-  private makeAll() {
-
-    if (config.isVisible.elements && this.model.elements) {
-      this.view.makeElements(this.model.elements);
-    }
-
-    if (config.isVisible.supports && this.model.boundaries) {
-      this.view.makeSupports(this.model.boundaries);
-    }
-
-    if (config.isVisible.nodes && this.model.nodes) {
-      this.view.makeNodes(this.model.nodes);
-    }
-
-    if (this.model.loads) {
-      this.view.makeLoads(this.model.loads);
-    }
-
-    if (this.model.nodes) {
-      this.view.makeNodesLabels(this.model.nodes);
-    }
-
-    if (this.model.elements) {
-      this.view.makeElementsLabels(this.model.elements);
-    }
-
-    if (this.model.results.displacements) {
-      this.view.makeDisplacements(this.model.elements, this.model.results.displacements, this.getDisplacementsScaleFactor());
-      this.view.makeDisplacementLabels(this.model.results.displacements, this.getDisplacementsScaleFactor());
-    }
-
-    this.view.makeDimensions();
-    this.view.makeCoordinateSystemIcon();
-    // this.view.makeCurrentlySelected(typeof config.selected, config.selected);
-    this.view.makeBorder();
-  }
-}
+} 
