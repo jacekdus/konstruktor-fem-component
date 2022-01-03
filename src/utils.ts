@@ -1,43 +1,47 @@
 import { Node, Element, Boundary, Load, Section, Material, Model } from './App/Model'
 
 
-export function jsonModelToModel(jsonModel: string) {
+export function jsonStringModelToModel(jsonStringModel: string) {
+  const jsonModel = JSON.parse(jsonStringModel);
+
+  return jsonModelToModel(jsonModel);
+}
+
+export function jsonModelToModel(jsonModel: any) {
   const model = new Model();
 
-  const data = JSON.parse(jsonModel);
-
-  data.materials.forEach((material: any) => {
+  jsonModel.materials.forEach((material: any) => {
     model.materials = [
       new Material(material.name, material.youngsModulus)
     ]
   });
 
-  data.sections.forEach((section: any) => {
+  jsonModel.sections.forEach((section: any) => {
     model.sections = [
       new Section(section.name, section.area)
     ]
   });
 
-  data.nodes.forEach((node: any) => {
+  jsonModel.nodes.forEach((node: any) => {
     model.setNode(new Node(node.x, node.y));
   });
 
-  data.elements.forEach((element: any) => {
+  jsonModel.elements.forEach((element: any) => {
     model.setElement(new Element(element.node1Id, element.node2Id, element.section, element.material));
   });
 
-  data.boundaries.forEach((boundary: any) => {
+  jsonModel.boundaries.forEach((boundary: any) => {
     model.boundaries.set(boundary.nodeId, new Boundary(boundary.xFixed, boundary.yFixed));
   });
 
-  data.loads.forEach((load: any) => {
+  jsonModel.loads.forEach((load: any) => {
     model.loads.set(load.nodeId, new Load(load.fx, load.fy));
   });
 
   return model;
 }
 
-export function modelToJsonModel(model: Model): string {
+export function modelToJsonModel(model: Model): JsonModel {
   const jsonModel: JsonModel = new JsonModel();
   
   model.materials.forEach((material: Material, idx) => {
@@ -64,10 +68,10 @@ export function modelToJsonModel(model: Model): string {
     jsonModel.loads.push({ id: jsonModel.loads.length + 1, nodeId: nodeId, fx: load.fx, fy: load.fy })
   })
 
-  return JSON.stringify(jsonModel);
+  return jsonModel;
 }
 
-class JsonModel {
+export class JsonModel {
   materials: any[] = [];
   sections: any[] = [];
   nodes: any[] = [];

@@ -181,9 +181,9 @@ export default class SceneShapesCreator {
     const dimensions = []
 
     const xMin = 0;
-    const xMax = 20;
+    const xMax = 50;
     const yMin = 0;
-    const yMax = 5;
+    const yMax = 10;
     const interval = 5;
 
     let curr = xMin;

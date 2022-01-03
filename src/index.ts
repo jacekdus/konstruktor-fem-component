@@ -1,3 +1,5 @@
+import JSONEditor from 'jsoneditor'
+
 import View from "./App/View";
 import { ConfigInterface } from "./App/Config/ConfigInterface";
 import { config } from "./App/Config/config";
@@ -5,12 +7,14 @@ import Controller from "./App/Controller";
 import { Model } from "./App/Model";
 
 // import * as data from './Test/Models/model.json'
-import { jsonModelToModel } from "./utils";
+import { jsonStringModelToModel } from "./utils";
 
 import { model } from './Test/Models/0_empty'
 // import { model } from './Test/Models/1_short_truss_roof'
 // import { model } from './Test/Models/2_big_truss_bridge'
 // import { model } from './Test/Models/3_eiffel_tower'
+
+import '../node_modules/jsoneditor/src/scss/jsoneditor.scss'
 
 const elements = {
   scene: document.getElementById('scene'),
@@ -29,6 +33,10 @@ const elements = {
     xFixed: document.getElementById('support-xFixed-cb') as HTMLInputElement,
     yFixed: document.getElementById('support-yFixed-cb') as HTMLInputElement
   },
+  jsoneditor: {
+    container: document.getElementById("jsoneditor"),
+    updateBtn: document.getElementById('jsoneditorUpdateBtn')
+  }
 }
 
 export class FemComponent {
@@ -41,7 +49,7 @@ export class FemComponent {
     this.config.elements = elements;
 
     if (jsonModel) {
-      this.model = jsonModelToModel(jsonModel)
+      this.model = jsonStringModelToModel(jsonModel)
     } else {
       this.model = model;
     }
@@ -53,11 +61,7 @@ export class FemComponent {
   }
 
   getJsonModel(): string {
-    return this.controller.getJsonModel();
-  }
-
-  getThumbnail(): string {
-    return config.elements.scene.innerHTML;
+    return JSON.stringify(this.controller.getJsonModel());
   }
 }
 

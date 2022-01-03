@@ -1,4 +1,4 @@
-import { modelToJsonModel } from "../utils";
+import { JsonModel, modelToJsonModel } from "../utils";
 import FemElement from "./Fem/FemElement";
 
 
@@ -117,7 +117,7 @@ export class Model {
     return this._elements.get(elementId)
   }
 
-  getJsonModel(): string {
+  getJsonModel(): JsonModel {
     return modelToJsonModel(this);
   }
 }

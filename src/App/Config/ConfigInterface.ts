@@ -2,7 +2,7 @@ import { Node, Material, Section } from '../Model';
 import { Mode } from './modeEnum'
 
 export interface ConfigInterface {
-  elements: {
+  elements: null | {
     scene: HTMLElement;
     calcBtn: HTMLElement;
     sceneVisibility: HTMLElement;
@@ -18,8 +18,12 @@ export interface ConfigInterface {
       fy: HTMLInputElement,
       xFixed: HTMLInputElement,
       yFixed: HTMLInputElement
+    },
+    jsoneditor: {
+      container: HTMLElement,
+      updateBtn: HTMLElement
     }
-  } | null,
+  },
   two: { 
     width: number,
     height: number,

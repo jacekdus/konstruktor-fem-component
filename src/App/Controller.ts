@@ -3,11 +3,15 @@ import View from "./View";
 import { config } from "./Config/config";
 import { Main as Calculator } from "./Fem/Main";
 import { Mode } from './Config/modeEnum'
-import { isInteger } from 'mathjs';
+import { isInteger, json } from 'mathjs';
 import ResultsUtils from './UI/ResultsUtils';
+import { JsonModel, jsonModelToModel } from '../utils';
+import JSONEditor from 'jsoneditor';
 
 
 export default class Controller {
+  private editor: JSONEditor;
+
   constructor(
     private model: Model, 
     private view: View
@@ -15,11 +19,23 @@ export default class Controller {
 
   init() {
     this.setScene();
-    this.renderScene();
+    this.view.render();
     this.addEventListeners();
+
+    this.launchJsonEditor()
   }
 
-  getJsonModel(): string {
+  launchJsonEditor() {
+    const options = {}
+    this.editor = new JSONEditor(config.elements.jsoneditor.container, options)
+
+    this.editor.set(this.getJsonModel());
+
+    // get json
+    // const updatedJson = editor.get()
+  }
+
+  getJsonModel(): JsonModel {
     return this.model.getJsonModel();
   }
 
@@ -35,12 +51,8 @@ export default class Controller {
     this.view.setCursor()
   }
 
-  private renderScene() {
-    this.view.render();
-  }
-
   private addEventListeners() {
-    const {modes, sceneVisibility, scene, two, calcBtn} = config.elements;
+    const {modes, sceneVisibility, scene, two, calcBtn, jsoneditor} = config.elements;
 
     window.addEventListener('resize', this.handleResizeSceneToContainersSize.bind(this))
 
@@ -55,6 +67,21 @@ export default class Controller {
 
     two.nodes.addEventListener('mouseover', this.handleMouseOverNode.bind(this))
     two.nodes.addEventListener('mouseout', this.handleMouseLeaveNode.bind(this))
+
+    jsoneditor.updateBtn.addEventListener('click', this.handleEditorUpdate.bind(this))
+  }
+
+  private handleEditorUpdate() {
+    const newJsonModel = this.editor.get();
+
+    const newModel: Model = jsonModelToModel(newJsonModel);
+
+    this.view.clearResults();
+    this.view.clearSceneObjects();
+
+    this.model = newModel;
+
+    this.setScene();
   }
 
   private handleMousewheel(event: any) {
@@ -69,7 +96,7 @@ export default class Controller {
     // Ideally objects shouldn't be rerendered but their position should be updated
     this.view.clearSceneObjects();
     this.setScene();
-    this.renderScene();
+    this.view.render();
   }
 
   private handleCurrentActiveMode(event: any) {
@@ -181,6 +208,9 @@ export default class Controller {
     const innerForces: HTMLInputElement = config.elements.sceneVisibility.querySelector('input[value=forces]');
     const reactions: HTMLInputElement = config.elements.sceneVisibility.querySelector('input[value=reactions]');
     [displacements, innerForces, reactions].forEach(el => el.disabled = false);
+
+    // Update editor
+    this.editor.set(this.model.getJsonModel());
   }
 
   private handleCursorMove(event: any) {
