@@ -156,7 +156,8 @@ export class Reaction extends Force {}
 export class Material {
   constructor(
     public name: string,
-    public youngsModulus: number
+    public youngsModulus: number,
+    public resistance: number
   ) {}
 }
 

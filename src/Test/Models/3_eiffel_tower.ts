@@ -3,7 +3,7 @@ import { Model, Node, Element, Boundary, Load, Section, Material } from '../../A
 export const model = new Model();
 
 const section = new Section('HEA 100', 0.00212)
-const material = new Material('Steel', 210000000000.0)
+const material = new Material('Steel', 210000000000.0, 235000000.0)
 model.sections = [ section ];
 model.materials = [ material ]
 

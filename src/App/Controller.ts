@@ -3,10 +3,12 @@ import View from "./View";
 import { config } from "./Config/config";
 import { Main as Calculator } from "./Fem/Main";
 import { Mode } from './Config/modeEnum'
-import { isInteger, json } from 'mathjs';
+import { isInteger } from 'mathjs';
 import ResultsUtils from './UI/ResultsUtils';
+import ResultsTableElement from './UI/ResultsTable/Main';
 import { JsonModel, jsonModelToModel } from '../utils';
 import JSONEditor from 'jsoneditor';
+import ResultsTable from './UI/ResultsTable/Main';
 
 
 export default class Controller {
@@ -30,9 +32,6 @@ export default class Controller {
     this.editor = new JSONEditor(config.elements.jsoneditor.container, options)
 
     this.editor.set(this.getJsonModel());
-
-    // get json
-    // const updatedJson = editor.get()
   }
 
   getJsonModel(): JsonModel {
@@ -198,16 +197,22 @@ export default class Controller {
     this.model.results = calculator.getResults();
     ResultsUtils.setDisplacementsScaleFactor(this.model.results.displacements, config);
 
+    // Set results in the view
     this.view.clearResults();
     this.view.setDisplacements(this.model.elements, this.model.results.displacements, this.model.nodes);
     this.view.setInnerForces(this.model.elements, this.model.results.innerForces, this.model.nodes);
     this.view.setInnerForceLegend();
     this.view.setReactions(this.model.results.reactions, this.model.nodes);
 
+    // Enable results checkboxes
     const displacements: HTMLInputElement = config.elements.sceneVisibility.querySelector('input[value=displacements]');
     const innerForces: HTMLInputElement = config.elements.sceneVisibility.querySelector('input[value=forces]');
     const reactions: HTMLInputElement = config.elements.sceneVisibility.querySelector('input[value=reactions]');
     [displacements, innerForces, reactions].forEach(el => el.disabled = false);
+    
+    // Results table
+    const resultsTable = ResultsTable.createResultsTableAsInnerText(this.model);
+    config.elements.resultsTable.innerHTML = resultsTable;
 
     // Update editor
     this.editor.set(this.model.getJsonModel());

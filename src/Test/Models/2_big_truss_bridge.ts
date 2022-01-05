@@ -16,7 +16,7 @@ model.setNode(new Node(5 + 20, 5))
 model.setNode(new Node(5 + 25, 5))
 
 const section = new Section('HEA 100', 0.00212)
-const material = new Material('Steel', 210000000000.0)
+const material = new Material('Steel', 210000000000.0, 235000000.0)
 model.sections = [ section ];
 model.materials = [ material ]
 

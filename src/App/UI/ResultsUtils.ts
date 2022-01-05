@@ -1,5 +1,5 @@
 import { ConfigInterface } from "../Config/ConfigInterface";
-import { Displacement, Force } from "../Model";
+import { Displacement } from "../Model";
 
 export default class ResultsUtils {
   private static maxDisplacementSizeInPx: number = 50;

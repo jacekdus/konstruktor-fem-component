@@ -40,7 +40,7 @@ export const config = ((): ConfigInterface => {
           selectedNodeId: undefined,
           secondNode: undefined,
           currentSection: new Section('HEA 100', 0.00212),
-          currentMaterial: new Material('Steel', 210000000000.0)
+          currentMaterial: new Material('Steel', 210000000000.0, 235000000.0)
         }
       }
     },

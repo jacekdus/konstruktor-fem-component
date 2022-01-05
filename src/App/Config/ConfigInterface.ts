@@ -22,7 +22,8 @@ export interface ConfigInterface {
     jsoneditor: {
       container: HTMLElement,
       updateBtn: HTMLElement
-    }
+    },
+    resultsTable: HTMLElement
   },
   two: { 
     width: number,

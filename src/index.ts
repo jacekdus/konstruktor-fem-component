@@ -9,9 +9,9 @@ import { Model } from "./App/Model";
 // import * as data from './Test/Models/model.json'
 import { jsonStringModelToModel } from "./utils";
 
-import { model } from './Test/Models/0_empty'
+// import { model } from './Test/Models/0_empty'
 // import { model } from './Test/Models/1_short_truss_roof'
-// import { model } from './Test/Models/2_big_truss_bridge'
+import { model } from './Test/Models/2_big_truss_bridge'
 // import { model } from './Test/Models/3_eiffel_tower'
 
 import '../node_modules/jsoneditor/src/scss/jsoneditor.scss'
@@ -34,9 +34,10 @@ const elements = {
     yFixed: document.getElementById('support-yFixed-cb') as HTMLInputElement
   },
   jsoneditor: {
-    container: document.getElementById("jsoneditor"),
+    container: document.getElementById('jsoneditor'),
     updateBtn: document.getElementById('jsoneditorUpdateBtn')
-  }
+  },
+  resultsTable: document.getElementById('results-container')
 }
 
 export class FemComponent {

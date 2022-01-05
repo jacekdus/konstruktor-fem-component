@@ -1,6 +1,6 @@
 {
   "materials": [
-    {"id": 1, "name": "Steel", "youngsModulus": 210000000000.0}
+    {"id": 1, "name": "Steel", "youngsModulus": 210000000000.0, "resistance": 235000000.0}
   ],
   "sections": [
     {"id": 1, "name": "HEA 100", "area": 0.00212}

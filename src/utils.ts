@@ -12,7 +12,7 @@ export function jsonModelToModel(jsonModel: any) {
 
   jsonModel.materials.forEach((material: any) => {
     model.materials = [
-      new Material(material.name, material.youngsModulus)
+      new Material(material.name, material.youngsModulus, material.resistance)
     ]
   });
 
