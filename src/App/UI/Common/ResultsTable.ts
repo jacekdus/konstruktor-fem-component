@@ -68,7 +68,7 @@ export default class ResultsTable {
     const normalStress = elem.axialForce / elem.area;
     const loadCapacity = normalStress / elem.resistance;
 
-    return `<tr ${Math.abs(loadCapacity) > 1.0 ? 'style="background-color: lightcoral; font-weight: bold;"' : ''}>
+    return `<tr ${Math.abs(loadCapacity) > 1.0 ? 'style="color: red; font-weight: bold;"' : ''}>
       <td>${this.round(elem.id)}</td>
       <td>${elem.area}</td>
       <td>${(elem.resistance / 1000000).toFixed(2)}</td>

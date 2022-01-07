@@ -2,6 +2,12 @@ import { multiply, inv } from "mathjs";
 
 export class Fem {
   static calculateDisplacements = (globalStiffnessMatrix, forcesMatrix) => {
-    return multiply(inv(globalStiffnessMatrix), forcesMatrix).toArray();
+    const result = multiply(inv(globalStiffnessMatrix), forcesMatrix);
+
+    if (typeof result === 'number') {
+      return result;
+    }
+
+    return result.toArray();
   }
 }

@@ -1,4 +1,4 @@
-import { matrix, multiply, inv, index, round, transpose, subtract } from 'mathjs';
+import { matrix, multiply, index, round, subtract } from 'mathjs';
 import { GlobalStiffness } from './Matrix/GlobalStiffness'
 import { GlobalBoundary } from './Matrix/GlobalBoundary';
 import { GlobalLoads } from "./Matrix/GlobalLoads";

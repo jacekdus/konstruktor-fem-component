@@ -1,5 +1,3 @@
-import JSONEditor from 'jsoneditor'
-
 import View from "./App/View";
 import { ConfigInterface } from "./App/Config/ConfigInterface";
 import { config } from "./App/Config/config";
@@ -14,31 +12,9 @@ import { jsonStringModelToModel } from "./utils";
 import { model } from './Test/Models/2_big_truss_bridge'
 // import { model } from './Test/Models/3_eiffel_tower'
 
-import '../node_modules/jsoneditor/src/scss/jsoneditor.scss'
+import { elements } from './Test/elements';
 
-const elements = {
-  scene: document.getElementById('scene'),
-  calcBtn: document.getElementById('calc-btn'),
-  sceneVisibility: document.getElementById('scene-visibility'),
-  modes: document.getElementById('mode'),
-  two: {
-    nodes: undefined as undefined | HTMLElement
-  },
-  toolbox: {
-    element: document.getElementById('element-toolbox'),
-    support: document.getElementById('support-toolbox'),
-    load: document.getElementById('load-toolbox'),
-    fx: document.getElementById('fx-input') as HTMLInputElement,
-    fy: document.getElementById('fy-input') as HTMLInputElement,
-    xFixed: document.getElementById('support-xFixed-cb') as HTMLInputElement,
-    yFixed: document.getElementById('support-yFixed-cb') as HTMLInputElement
-  },
-  jsoneditor: {
-    container: document.getElementById('jsoneditor'),
-    updateBtn: document.getElementById('jsoneditorUpdateBtn')
-  },
-  resultsTable: document.getElementById('results-container')
-}
+import '../node_modules/jsoneditor/src/scss/jsoneditor.scss'
 
 export class FemComponent {
   private controller: Controller;

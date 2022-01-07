@@ -1,0 +1,46 @@
+{
+  "materials": [
+    {
+      "id": 1, 
+      "type": "STEEL",
+      "name": "S235", 
+      "youngsModulus": 210000000000.0, 
+      "resistance": 235000000.0
+    },
+    {
+      "id": 2, 
+      "type": "STEEL",
+      "name": "S275", 
+      "youngsModulus": 210000000000.0, 
+      "resistance": 275000000.0
+    },
+    {
+      "id": 3, 
+      "type": "STEEL",
+      "name": "S355", 
+      "youngsModulus": 210000000000.0, 
+      "resistance": 355000000.0
+    },
+    {
+      "id": 4,
+      "type": "CONCRETE",
+      "name": "C30/37", 
+      "youngsModulus": 32000000000.0, 
+      "resistance": 2900000.0
+    },
+    {
+      "id": 5,
+      "type": "CONCRETE",
+      "name": "C35/45", 
+      "youngsModulus": 34000000000.0, 
+      "resistance": 3200000.0
+    },
+    {
+      "id": 6,
+      "type": "CONCRETE",
+      "name": "C40/50", 
+      "youngsModulus": 35000000000.0, 
+      "resistance": 3500000.0
+    }
+  ]
+}

@@ -13,7 +13,11 @@ export class GlobalDisplacements {
   addUnboundedDisplacements(unboundedDisplacements, boundaryArray) {
     boundaryArray.forEach((boundary, index) => {
       if (boundary === 0) {
-        this.matrix[index] = unboundedDisplacements.shift();
+        if (typeof unboundedDisplacements === 'number') {
+          this.matrix[index] = unboundedDisplacements;
+        } else {
+          this.matrix[index] = unboundedDisplacements.shift();
+        }
       }
     });
   }

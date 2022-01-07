@@ -48,7 +48,13 @@ export class GlobalStiffness {
 	}
 
 	getSubsettedMatrix(subsettedMatrixIndexes) {
-		return matrix(this.matrix).subset(index(subsettedMatrixIndexes, subsettedMatrixIndexes)).toArray();
+		const result = matrix(this.matrix).subset(index(subsettedMatrixIndexes, subsettedMatrixIndexes));
+
+		if (typeof result === 'number') {
+			return result
+		}
+
+		return result.toArray();
 	}
 
   getMatrix() {

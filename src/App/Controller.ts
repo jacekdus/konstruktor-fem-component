@@ -3,12 +3,13 @@ import View from "./View";
 import { config } from "./Config/config";
 import { Main as Calculator } from "./Fem/Main";
 import { Mode } from './Config/modeEnum'
-import { isInteger } from 'mathjs';
+import { isInteger, sec } from 'mathjs';
 import ResultsUtils from './UI/ResultsUtils';
-import ResultsTableElement from './UI/ResultsTable/Main';
+// import ResultsTableElement from './UI/Common/ResultsTable';
 import { JsonModel, jsonModelToModel } from '../utils';
 import JSONEditor from 'jsoneditor';
-import ResultsTable from './UI/ResultsTable/Main';
+import ResultsTable from './UI/Common/ResultsTable';
+import Select from './UI/Common/Elements';
 
 
 export default class Controller {
@@ -24,7 +25,20 @@ export default class Controller {
     this.view.render();
     this.addEventListeners();
 
+    this.setupUI();
+
     this.launchJsonEditor()
+  }
+
+  setupUI() {
+    config.mode.state.createElement.materials = Select.getMaterials();
+    config.mode.state.createElement.sections = Select.getSections();
+
+    config.mode.state.createElement.currentMaterial = config.mode.state.createElement.materials[0];
+    config.mode.state.createElement.currentSection = config.mode.state.createElement.sections[0];
+
+    config.elements.toolbox.select.material.innerHTML = Select.createMaterialSelectAsInnerHTML();
+    config.elements.toolbox.select.section.innerHTML = Select.createSectionSelectAsInnerHTML();
   }
 
   launchJsonEditor() {
@@ -51,7 +65,7 @@ export default class Controller {
   }
 
   private addEventListeners() {
-    const {modes, sceneVisibility, scene, two, calcBtn, jsoneditor} = config.elements;
+    const {modes, sceneVisibility, scene, two, calcBtn, jsoneditor, toolbox} = config.elements;
 
     window.addEventListener('resize', this.handleResizeSceneToContainersSize.bind(this))
 
@@ -68,6 +82,24 @@ export default class Controller {
     two.nodes.addEventListener('mouseout', this.handleMouseLeaveNode.bind(this))
 
     jsoneditor.updateBtn.addEventListener('click', this.handleEditorUpdate.bind(this))
+
+    toolbox.select.material.addEventListener('change', this.handleMaterialChange.bind(this));
+    toolbox.select.section.addEventListener('change', this.handleSectionChange.bind(this));
+  }
+
+  private handleMaterialChange(event: any) {
+    const materialName: string = event.target.value;
+    const material = config.mode.state.createElement.materials.find(material => material.name === materialName)
+    config.mode.state.createElement.currentMaterial = material;
+    console.log(config.mode.state.createElement.currentMaterial);
+  }
+
+  private handleSectionChange(event: any) {
+    const sectionName: string = event.target.value;
+    const section = config.mode.state.createElement.sections.find(section => section.name === sectionName)
+
+    config.mode.state.createElement.currentSection = section;
+    console.log(config.mode.state.createElement.currentSection);
   }
 
   private handleEditorUpdate() {
@@ -249,7 +281,6 @@ export default class Controller {
         const nodeId = this.view.sceneNodeIdToNodeId.get(sceneId);
 
         if (nodeId) {
-          // const node: Node = this.model.getNode(nodeId);
           config.mode.state.createElement.selectedNodeId = nodeId
         } else {
           const node: Node = this.view.getNodePositionFromCursorPosition(event.pageX, event.pageY);
@@ -264,7 +295,6 @@ export default class Controller {
         const nodeId = this.view.sceneNodeIdToNodeId.get(sceneId);
 
         if (nodeId) {
-          // const node: Node = this.model.getNode(nodeId);
           this.createElement(config.mode.state.createElement.selectedNodeId, nodeId)
         } else {
           const node: Node = this.view.getNodePositionFromCursorPosition(event.pageX, event.pageY);
@@ -317,7 +347,8 @@ export default class Controller {
   }
   
   private createElement(node1Id: number, node2Id: number) {
-    const element = new Element(node1Id, node2Id, config.mode.state.createElement.currentSection, 
+    const element = new Element(node1Id, node2Id, 
+      config.mode.state.createElement.currentSection, 
       config.mode.state.createElement.currentMaterial);
 
     const node1 = this.model.nodes.get(node1Id);
@@ -327,6 +358,6 @@ export default class Controller {
     this.view.setElement(elementId, node1, node2);
 
     config.mode.state.createElement.selectedNodeId = undefined;
-    config.mode.state.createElement.secondNode = undefined;
+    config.mode.state.createElement.secondNodeId = undefined;
   }
 } 

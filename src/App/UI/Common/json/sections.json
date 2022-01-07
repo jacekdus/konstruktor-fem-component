@@ -1,0 +1,12 @@
+{
+  "sections": [
+    {"id": 1, "name": "IPE 100", "area": 0.00103},
+    {"id": 2, "name": "IPE 200", "area": 0.00285},
+    {"id": 3, "name": "IPE 600", "area": 0.01560},
+    {"id": 4, "name": "HEB 100", "area": 0.00260},
+    {"id": 5, "name": "HEB 200", "area": 0.00781},
+    {"id": 6, "name": "HEB 600", "area": 0.02700},
+    {"id": 7, "name": "200x200", "area": 0.04},
+    {"id": 8, "name": "600x600", "area": 0.36}
+  ]
+}

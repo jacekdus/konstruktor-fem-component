@@ -1,5 +1,3 @@
-import { string } from "mathjs";
-import { Material, Section } from "../Model";
 import { ConfigInterface } from "./ConfigInterface";
 import { Mode } from './modeEnum'
 
@@ -38,9 +36,11 @@ export const config = ((): ConfigInterface => {
       state: {
         createElement: {
           selectedNodeId: undefined,
-          secondNode: undefined,
-          currentSection: new Section('HEA 100', 0.00212),
-          currentMaterial: new Material('Steel', 210000000000.0, 235000000.0)
+          secondNodeId: undefined,
+          materials: [],
+          sections: [],
+          currentMaterial: undefined,
+          currentSection: undefined
         }
       }
     },

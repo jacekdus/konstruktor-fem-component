@@ -17,7 +17,11 @@ export interface ConfigInterface {
       fx: HTMLInputElement,
       fy: HTMLInputElement,
       xFixed: HTMLInputElement,
-      yFixed: HTMLInputElement
+      yFixed: HTMLInputElement,
+      select: {
+        material:  HTMLInputElement,
+        section:  HTMLInputElement
+      }
     },
     jsoneditor: {
       container: HTMLElement,
@@ -57,9 +61,11 @@ export interface ConfigInterface {
     state: {
       createElement: {
         selectedNodeId: number | undefined,
-        secondNode: number | undefined,
-        currentSection: Section,
-        currentMaterial: Material
+        secondNodeId: number | undefined,
+        materials: Material[],
+        sections: Section[],
+        currentMaterial: Material | undefined,
+        currentSection: Section | undefined
       }
     }
   },
